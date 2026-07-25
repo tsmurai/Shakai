@@ -223,46 +223,72 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 <script>
 /* ========================= チャート部品（SVG/HTML） ========================= */
 const MASK = '<span class="masked">？</span>';
+const MASK_FILL = 'var(--line)';
 function stackedBar(segments, maskLabel){
-  const total = segments.reduce((s,x)=>s+x.value,0);
+  const hasMask = segments.some(s=>s.label===maskLabel);
+  const RESERVED = 22;
+  const othersTotal = segments.filter(s=>s.label!==maskLabel).reduce((s,x)=>s+x.value,0);
+  const avail = hasMask ? (100-RESERVED) : 100;
   let x = 0;
   const rects = segments.map((seg,i)=>{
-    const width = seg.value/total*100;
+    const isMasked = seg.label===maskLabel;
+    const width = isMasked ? RESERVED : (othersTotal>0 ? seg.value/othersTotal*avail : 0);
     const w = Math.max(width - (width>1?0.6:0), 0.2);
-    const r = `<rect x="${x}%" y="0" width="${w}%" height="100%" fill="var(--s${(seg.c!=null?seg.c:i%8)+1})" rx="3"></rect>`;
+    const fill = isMasked ? MASK_FILL : `var(--s${(seg.c!=null?seg.c:i%8)+1})`;
+    const r = `<rect x="${x}%" y="0" width="${w}%" height="100%" fill="${fill}" rx="3"></rect>`;
     x += width;
     return r;
   }).join('');
-  const legend = segments.map((seg,i)=>`<span class="lg-item"><i style="background:var(--s${(seg.c!=null?seg.c:i%8)+1})"></i>${seg.label} ${seg.label===maskLabel?MASK:seg.value+'%'}</span>`).join('');
+  const legend = segments.map((seg,i)=>{
+    const isMasked = seg.label===maskLabel;
+    const swatch = isMasked ? MASK_FILL : `var(--s${(seg.c!=null?seg.c:i%8)+1})`;
+    return `<span class="lg-item"><i style="background:${swatch}"></i>${seg.label} ${isMasked?MASK:seg.value+'%'}</span>`;
+  }).join('');
   return `<div class="chart-wrap"><svg viewBox="0 0 100 28" preserveAspectRatio="none" class="bar100">${rects}</svg><div class="legend">${legend}</div></div>`;
 }
 function groupedStackedBars(groups, maskGroup, maskSeg){
+  const RESERVED = 28;
   const cols = groups.map(g=>{
-    const segs = g.segments.map((s,i)=>`<div class="gsb-seg" style="height:${s.value}%; background:var(--s${(s.c!=null?s.c:i%8)+1})"></div>`).join('');
     const maskedHere = g.label===maskGroup;
+    const othersTotal = g.segments.filter(s=>s.label!==maskSeg).reduce((s,x)=>s+x.value,0);
+    const avail = maskedHere ? (100-RESERVED) : 100;
+    const segs = g.segments.map((s,i)=>{
+      const isMasked = maskedHere && s.label===maskSeg;
+      const h = isMasked ? RESERVED : (maskedHere ? (othersTotal>0? s.value/othersTotal*avail : 0) : s.value);
+      const fill = isMasked ? MASK_FILL : `var(--s${(s.c!=null?s.c:i%8)+1})`;
+      return `<div class="gsb-seg" style="height:${h}%; background:${fill}"></div>`;
+    }).join('');
     return `<div class="gsb-col"><div class="gsb-bar">${segs}</div><div class="gsb-label">${g.label}${maskedHere?' '+MASK:''}</div></div>`;
   }).join('');
   const legend = groups[0].segments.map((s,i)=>`<span class="lg-item"><i style="background:var(--s${(s.c!=null?s.c:i%8)+1})"></i>${s.label}</span>`).join('');
-  return `<div class="chart-wrap"><div class="gsb">${cols}</div><div class="legend">${legend}</div>${maskGroup?`<div class="note">${maskGroup}の「${maskSeg}」の割合は？（グラフの高さを参考に考えよう）</div>`:''}</div>`;
+  return `<div class="chart-wrap"><div class="gsb">${cols}</div><div class="legend">${legend}</div></div>`;
 }
 function bubbleChart(items, unit, maskLabel){
-  const max = Math.max(...items.map(i=>i.value));
   const maxR = 42;
+  const NEUTRAL_R = 24;
+  const refItems = items.filter(i=>i.label!==maskLabel);
+  const max = Math.max(...(refItems.length?refItems:items).map(i=>i.value));
   const cols = items.map((it,i)=>{
-    const r = Math.sqrt(it.value/max)*maxR;
+    const isMasked = it.label===maskLabel;
+    const r = isMasked ? NEUTRAL_R : Math.sqrt(it.value/max)*maxR;
     const size = maxR*2+10;
-    const valText = it.label===maskLabel ? MASK : `${it.value}${unit}`;
-    return `<div class="bubble-col"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="var(--s${(i%8)+1})" fill-opacity="0.85"></circle></svg><div class="bubble-label">${it.label}<br><b>${valText}</b></div></div>`;
+    const valText = isMasked ? MASK : `${it.value}${unit}`;
+    const fill = isMasked ? MASK_FILL : `var(--s${(i%8)+1})`;
+    return `<div class="bubble-col"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="${fill}" fill-opacity="0.9"></circle></svg><div class="bubble-label">${it.label}<br><b>${valText}</b></div></div>`;
   }).join('');
   return `<div class="chart-wrap"><div class="bubble-row">${cols}</div></div>`;
 }
 function barListChart(items, unit, colorIdx, maskLabel){
-  const max = Math.max(...items.map(i=>i.value));
+  const NEUTRAL_W = 38;
+  const refItems = items.filter(i=>i.label!==maskLabel);
+  const max = Math.max(...(refItems.length?refItems:items).map(i=>i.value));
   const c = colorIdx==null?0:colorIdx;
   const rows = items.map(it=>{
-    const w = (it.value/max*100).toFixed(1);
-    const valText = it.label===maskLabel ? MASK : `${it.value}${unit}`;
-    return `<div class="barlist-row"><span class="bl-label">${it.label}</span><span class="bl-track"><span class="bl-fill" style="width:${w}%; background:var(--s${c+1})"></span></span><span class="bl-value">${valText}</span></div>`;
+    const isMasked = it.label===maskLabel;
+    const w = isMasked ? NEUTRAL_W : (it.value/max*100).toFixed(1);
+    const fill = isMasked ? MASK_FILL : `var(--s${c+1})`;
+    const valText = isMasked ? MASK : `${it.value}${unit}`;
+    return `<div class="barlist-row"><span class="bl-label">${it.label}</span><span class="bl-track"><span class="bl-fill" style="width:${w}%; background:${fill}"></span></span><span class="bl-value">${valText}</span></div>`;
   }).join('');
   return `<div class="chart-wrap"><div class="barlist">${rows}</div></div>`;
 }
