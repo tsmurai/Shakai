@@ -1,4 +1,4 @@
-const CACHE_NAME = "shakai-app-v1";
+const CACHE_NAME = "shakai-app-v2";
 
 const APP_SHELL = [
   "./",
@@ -23,21 +23,20 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// ネットワーク優先。オンライン中は常に最新版を取得し、オフライン時のみキャッシュにフォールバックする
+// (アプリを継続的に更新するため、キャッシュ優先だと更新が反映されず古い内容が残ってしまう)
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request)
-        .then((res) => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return res;
-        })
-        .catch(() => cached);
-    })
+    fetch(event.request)
+      .then((res) => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
