@@ -107,6 +107,7 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 /* ---- charts ---- */
 .chart-wrap{margin:2px 16px 14px; padding:14px 14px 12px; background:var(--chip); border-radius:14px;}
 .chart-title{font-size:12px; font-weight:700; color:var(--accent); margin-bottom:8px;}
+.chart-hidden{text-align:center; color:var(--sub); font-size:13px; padding:22px 10px;}
 .masked{display:inline-block; min-width:2.4em; padding:0 6px; border:1.5px dashed var(--accent); border-radius:6px; color:var(--accent); font-weight:800; text-align:center;}
 .face.back .masked{border-color:#fff; color:#fff;}
 .rankctx table{font-size:13px;}
@@ -325,25 +326,25 @@ function compassDiagram(p, maskDir){
 
 /* ========================= 図の登録（VISUALS） ========================= */
 const VISUALS = {
-  landform: { title:'図2 国土の地形区分構成', render:(mask)=>stackedBar([
+  landform: { title:'図2 国土の地形区分構成', hideUntilAnswered:true, render:(mask)=>stackedBar([
     {label:'山地・丘陵地', value:72.8, c:0},{label:'低地', value:13.8, c:2},{label:'台地', value:11.0, c:3},{label:'その他', value:2.4, c:7}
   ], mask)},
-  landuse: { title:'図3 国土利用の割合', render:(mask)=>stackedBar([
+  landuse: { title:'図3 国土利用の割合', hideUntilAnswered:true, render:(mask)=>stackedBar([
     {label:'森林', value:66.2, c:2},{label:'その他', value:17.1, c:7},{label:'農地', value:11.4, c:3},{label:'宅地', value:5.3, c:0}
   ], mask)},
-  agestruct: { title:'図6 年齢別人口構成', render:(mask)=>groupedStackedBars([
+  agestruct: { title:'図6 年齢別人口構成', hideUntilAnswered:true, render:(mask)=>groupedStackedBars([
     {label:'1935年', segments:[{label:'65歳以上',value:4.7,c:7},{label:'15〜64歳',value:58.5,c:2},{label:'0〜14歳',value:36.9,c:0}]},
     {label:'1960年', segments:[{label:'65歳以上',value:5.7,c:7},{label:'15〜64歳',value:64.1,c:2},{label:'0〜14歳',value:30.2,c:0}]},
     {label:'2025年', segments:[{label:'65歳以上',value:29.4,c:7},{label:'15〜64歳',value:59.7,c:2},{label:'0〜14歳',value:10.9,c:0}]},
   ], mask && mask.group, mask && mask.seg)},
-  industry: { title:'図8 産業別人口構成（2025年）', render:(mask)=>stackedBar([
+  industry: { title:'図8 産業別人口構成（2025年）', hideUntilAnswered:true, render:(mask)=>stackedBar([
     {label:'第3次産業', value:73.4, c:0},{label:'第2次産業', value:22.2, c:2},{label:'第1次産業', value:2.7, c:3},{label:'分類不能', value:1.7, c:7}
   ], mask)},
-  zairyu: { title:'図9 国籍別在留外国人（413万人）', render:(mask)=>stackedBar([
+  zairyu: { title:'図9 国籍別在留外国人（413万人）', hideUntilAnswered:true, render:(mask)=>stackedBar([
     {label:'中国', value:22.6, c:0},{label:'ベトナム', value:16.5, c:1},{label:'韓国', value:9.9, c:2},{label:'フィリピン', value:8.6, c:3},
     {label:'ネパール', value:7.3, c:4},{label:'インドネシア', value:6.4, c:5},{label:'ブラジル', value:5.1, c:6},{label:'その他', value:23.6, c:7}
   ], mask)},
-  roudou: { title:'図10 国籍別外国人労働者（257万人）', render:(mask)=>stackedBar([
+  roudou: { title:'図10 国籍別外国人労働者（257万人）', hideUntilAnswered:true, render:(mask)=>stackedBar([
     {label:'ベトナム', value:23.6, c:1},{label:'中国', value:16.8, c:0},{label:'フィリピン', value:10.1, c:3},{label:'ネパール', value:9.2, c:4},
     {label:'ブラジル', value:8.9, c:6},{label:'インドネシア/ミャンマー', value:6.4, c:5},{label:'その他', value:19.8, c:7}
   ], mask)},
@@ -932,8 +933,11 @@ function renderQuiz(){
   if(!quiz) return `<div class="empty">クイズが開始されていません</div>`;
   const cur = quiz.qs[quiz.idx];
   const pct = Math.round((quiz.idx)/quiz.qs.length*100);
-  const showChart = cur.card.chartKey && VISUALS[cur.card.chartKey] && !cur.card.rankTable;
-  const chartHtml = showChart ? `<div class="qchart" id="qchartWrap">${VISUALS[cur.card.chartKey].render(cur.card.maskKey)}</div>` : '';
+  const chart = cur.card.chartKey && VISUALS[cur.card.chartKey];
+  const showChart = chart && !cur.card.rankTable && !chart.hideUntilAnswered;
+  const showPlaceholder = chart && !cur.card.rankTable && chart.hideUntilAnswered;
+  const chartHtml = showChart ? `<div class="qchart" id="qchartWrap">${chart.render(cur.card.maskKey)}</div>`
+    : showPlaceholder ? `<div class="qchart" id="qchartWrap"><div class="chart-wrap chart-hidden">📊 図は回答後に表示されます</div></div>` : '';
   return `
     <div class="progressbar"><i style="width:${pct}%"></i></div>
     <div class="qbadge">${cur.card.badge}${cur.card.tier==='ref'?'<span class="tag-ref">参考</span>':''}　（${quiz.idx+1} / ${quiz.qs.length}）</div>
@@ -1029,7 +1033,9 @@ function renderFc(){
   const fc = state.fc;
   if(!fc) return `<div class="empty">カードが選択されていません</div>`;
   const cur = fc.deck[fc.idx];
-  const showChart = cur.chartKey && VISUALS[cur.chartKey] && !cur.rankTable;
+  const chart = cur.chartKey && VISUALS[cur.chartKey];
+  const showChart = chart && !cur.rankTable && !chart.hideUntilAnswered;
+  const showPlaceholder = chart && !cur.rankTable && chart.hideUntilAnswered;
   return `
     <div class="fc-wrap">
       <div class="fc-count">${fc.idx+1} / ${fc.deck.length}</div>
@@ -1038,13 +1044,14 @@ function renderFc(){
           <div class="face front">
             <div class="tag">${cur.badge}</div>
             <div class="main">${cur.q}</div>
-            ${showChart ? VISUALS[cur.chartKey].render(cur.maskKey) : ''}
+            ${showChart ? chart.render(cur.maskKey) : ''}
+            ${showPlaceholder ? `<div class="chart-wrap chart-hidden">📊 図は裏面で表示されます</div>` : ''}
             <div class="hint">タップしてめくる</div>
           </div>
           <div class="face back">
             <div class="tag">こたえ</div>
             <div class="main">${cur.a}</div>
-            ${showChart ? VISUALS[cur.chartKey].render() : ''}
+            ${(showChart||showPlaceholder) ? chart.render() : ''}
             ${cur.rankTable ? rankContextTable(cur.rankTable, cur.rankHere) : ''}
             <div class="hint">タップして戻す</div>
           </div>
