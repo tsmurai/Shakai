@@ -346,24 +346,35 @@ function projJP(lon, lat){
 function geoMapSVG(name){
   const g = GEO[name];
   if(!g) return '';
-  const W = JAPAN_MAP.w, H = JAPAN_MAP.h;
-  let marker = '';
+  let marker = '', vb;
+  const PAD = 20, MIN_SPAN = 75, POINT_SPAN = 130;
   if(g.type === 'point'){
     const [x,y] = projJP(g.pt[0], g.pt[1]);
-    marker = `<circle cx="${x}" cy="${y}" r="6" fill="var(--s8)" stroke="#fff" stroke-width="1.5"/>
-      <circle cx="${x}" cy="${y}" r="11" fill="none" stroke="var(--s8)" stroke-width="1.5" opacity="0.6"/>`;
+    const half = POINT_SPAN/2;
+    vb = `${(x-half).toFixed(1)} ${(y-half).toFixed(1)} ${POINT_SPAN} ${POINT_SPAN}`;
+    marker = `<circle cx="${x}" cy="${y}" r="7" fill="var(--s8)" stroke="#fff" stroke-width="2"/>
+      <circle cx="${x}" cy="${y}" r="14" fill="none" stroke="var(--s8)" stroke-width="1.6" opacity="0.6" vector-effect="non-scaling-stroke"/>`;
   } else if(g.type === 'river'){
     const pts = g.pts.map(([lo,la])=>projJP(lo,la));
+    const xs = pts.map(p=>p[0]), ys = pts.map(p=>p[1]);
+    let minx=Math.min(...xs)-PAD, maxx=Math.max(...xs)+PAD;
+    let miny=Math.min(...ys)-PAD, maxy=Math.max(...ys)+PAD;
+    let w = maxx-minx, h = maxy-miny;
+    if(w < MIN_SPAN){ const cx=(minx+maxx)/2; minx=cx-MIN_SPAN/2; maxx=cx+MIN_SPAN/2; w=MIN_SPAN; }
+    if(h < MIN_SPAN){ const cy=(miny+maxy)/2; miny=cy-MIN_SPAN/2; maxy=cy+MIN_SPAN/2; h=MIN_SPAN; }
+    vb = `${minx.toFixed(1)} ${miny.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`;
     const d = 'M' + pts.map(p=>p[0]+','+p[1]).join(' L');
     const [ex,ey] = pts[pts.length-1];
-    marker = `<path d="${d}" fill="none" stroke="var(--s8)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="${ex}" cy="${ey}" r="5" fill="var(--s8)" stroke="#fff" stroke-width="1.5"/>`;
+    marker = `<path d="${d}" fill="none" stroke="var(--s8)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+      <circle cx="${ex}" cy="${ey}" r="5" fill="var(--s8)" stroke="#fff" stroke-width="1.8" vector-effect="non-scaling-stroke"/>`;
+  } else {
+    vb = `0 0 ${JAPAN_MAP.w} ${JAPAN_MAP.h}`;
   }
   return `<div class="chart-wrap geo-wrap">
-    <svg viewBox="0 0 ${W} ${H}" class="geo-svg" preserveAspectRatio="xMidYMid meet">
+    <svg viewBox="${vb}" class="geo-svg" preserveAspectRatio="xMidYMid meet">
       <path d="${JAPAN_MAP.fill}" fill="var(--geo-land)"/>
-      <path d="${JAPAN_MAP.internal}" fill="none" stroke="var(--geo-border)" stroke-width="1" stroke-dasharray="2.5,2"/>
-      <path d="${JAPAN_MAP.coastal}" fill="none" stroke="var(--geo-coast)" stroke-width="1.1"/>
+      <path d="${JAPAN_MAP.internal}" fill="none" stroke="var(--geo-border)" stroke-width="1.4" stroke-dasharray="3,2.4" vector-effect="non-scaling-stroke"/>
+      <path d="${JAPAN_MAP.coastal}" fill="none" stroke="var(--geo-coast)" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
       ${marker}
     </svg>
     <div class="geo-caption">📍 ${name}（およその位置）</div>
