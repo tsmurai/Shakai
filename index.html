@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -106,6 +106,15 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 
 /* ---- charts ---- */
 .chart-wrap{margin:2px 16px 14px; padding:14px 14px 12px; background:var(--chip); border-radius:14px;}
+.chart-title{font-size:12px; font-weight:700; color:var(--accent); margin-bottom:8px;}
+.masked{display:inline-block; min-width:2.4em; padding:0 6px; border:1.5px dashed var(--accent); border-radius:6px; color:var(--accent); font-weight:800; text-align:center;}
+.face.back .masked{border-color:#fff; color:#fff;}
+.rankctx table{font-size:13px;}
+.rankctx td{padding:6px 4px;}
+.rankctx tr.rankhit td{color:var(--accent); font-weight:800; background:color-mix(in srgb, var(--accent) 12%, transparent); border-radius:6px;}
+.face.back .rankctx{background:rgba(255,255,255,.14);}
+.face.back .chart-title{color:#fff;}
+.face.back .rankctx tr.rankhit td{color:#fff; background:rgba(255,255,255,.22);}
 .bar100{width:100%; height:28px; display:block; border-radius:4px; overflow:hidden;}
 .legend{display:flex; flex-wrap:wrap; gap:7px 14px; margin-top:10px; font-size:11.5px; color:var(--sub);}
 .legend .lg-item{display:flex; align-items:center; gap:5px;}
@@ -192,6 +201,8 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 .fc-btns button{flex:1; padding:14px; border-radius:14px; border:none; font-size:14.5px; font-weight:700; cursor:pointer;}
 .fc-again{background:var(--chip); color:var(--ink);}
 .fc-good{background:var(--good); color:#fff;}
+.fc-good.confirming{background:var(--accent2); animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.6;}}
 .fc-nav{display:flex; gap:14px; margin-top:14px; font-size:13px; color:var(--sub);}
 .fc-nav span{cursor:pointer; text-decoration:underline;}
 
@@ -211,7 +222,8 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 
 <script>
 /* ========================= チャート部品（SVG/HTML） ========================= */
-function stackedBar(segments){
+const MASK = '<span class="masked">？</span>';
+function stackedBar(segments, maskLabel){
   const total = segments.reduce((s,x)=>s+x.value,0);
   let x = 0;
   const rects = segments.map((seg,i)=>{
@@ -221,100 +233,114 @@ function stackedBar(segments){
     x += width;
     return r;
   }).join('');
-  const legend = segments.map((seg,i)=>`<span class="lg-item"><i style="background:var(--s${(seg.c!=null?seg.c:i%8)+1})"></i>${seg.label} ${seg.value}%</span>`).join('');
+  const legend = segments.map((seg,i)=>`<span class="lg-item"><i style="background:var(--s${(seg.c!=null?seg.c:i%8)+1})"></i>${seg.label} ${seg.label===maskLabel?MASK:seg.value+'%'}</span>`).join('');
   return `<div class="chart-wrap"><svg viewBox="0 0 100 28" preserveAspectRatio="none" class="bar100">${rects}</svg><div class="legend">${legend}</div></div>`;
 }
-function groupedStackedBars(groups){
+function groupedStackedBars(groups, maskGroup, maskSeg){
   const cols = groups.map(g=>{
     const segs = g.segments.map((s,i)=>`<div class="gsb-seg" style="height:${s.value}%; background:var(--s${(s.c!=null?s.c:i%8)+1})"></div>`).join('');
-    return `<div class="gsb-col"><div class="gsb-bar">${segs}</div><div class="gsb-label">${g.label}</div></div>`;
+    const maskedHere = g.label===maskGroup;
+    return `<div class="gsb-col"><div class="gsb-bar">${segs}</div><div class="gsb-label">${g.label}${maskedHere?' '+MASK:''}</div></div>`;
   }).join('');
   const legend = groups[0].segments.map((s,i)=>`<span class="lg-item"><i style="background:var(--s${(s.c!=null?s.c:i%8)+1})"></i>${s.label}</span>`).join('');
-  return `<div class="chart-wrap"><div class="gsb">${cols}</div><div class="legend">${legend}</div></div>`;
+  return `<div class="chart-wrap"><div class="gsb">${cols}</div><div class="legend">${legend}</div>${maskGroup?`<div class="note">${maskGroup}の「${maskSeg}」の割合は？（グラフの高さを参考に考えよう）</div>`:''}</div>`;
 }
-function bubbleChart(items, unit){
+function bubbleChart(items, unit, maskLabel){
   const max = Math.max(...items.map(i=>i.value));
   const maxR = 42;
   const cols = items.map((it,i)=>{
     const r = Math.sqrt(it.value/max)*maxR;
     const size = maxR*2+10;
-    return `<div class="bubble-col"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="var(--s${(i%8)+1})" fill-opacity="0.85"></circle></svg><div class="bubble-label">${it.label}<br><b>${it.value}${unit}</b></div></div>`;
+    const valText = it.label===maskLabel ? MASK : `${it.value}${unit}`;
+    return `<div class="bubble-col"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="var(--s${(i%8)+1})" fill-opacity="0.85"></circle></svg><div class="bubble-label">${it.label}<br><b>${valText}</b></div></div>`;
   }).join('');
   return `<div class="chart-wrap"><div class="bubble-row">${cols}</div></div>`;
 }
-function barListChart(items, unit, colorIdx){
+function barListChart(items, unit, colorIdx, maskLabel){
   const max = Math.max(...items.map(i=>i.value));
   const c = colorIdx==null?0:colorIdx;
   const rows = items.map(it=>{
     const w = (it.value/max*100).toFixed(1);
-    return `<div class="barlist-row"><span class="bl-label">${it.label}</span><span class="bl-track"><span class="bl-fill" style="width:${w}%; background:var(--s${c+1})"></span></span><span class="bl-value">${it.value}${unit}</span></div>`;
+    const valText = it.label===maskLabel ? MASK : `${it.value}${unit}`;
+    return `<div class="barlist-row"><span class="bl-label">${it.label}</span><span class="bl-track"><span class="bl-fill" style="width:${w}%; background:var(--s${c+1})"></span></span><span class="bl-value">${valText}</span></div>`;
   }).join('');
   return `<div class="chart-wrap"><div class="barlist">${rows}</div></div>`;
 }
-function pyramidIcon(type,label){
+function rankContextTable(table, highlightRank){
+  const rows = table.items.map(i=>{
+    const hit = i.rank===highlightRank;
+    return `<tr class="${hit?'rankhit':''}"><td class="rank">${i.rank}位</td><td>${i.name}</td><td>${i.value||'—'}</td></tr>`;
+  }).join('');
+  return `<div class="chart-wrap rankctx"><div class="chart-title">${table.title} 全体の順位</div>
+    <table><tbody>${rows}</tbody></table></div>`;
+}
+function pyramidIcon(type,label,masked){
   const shapes = {
     fuji: 'M50,8 L90,92 L10,92 Z',
     bell: 'M50,10 C32,10 26,26 30,40 C18,50 14,66 18,92 L82,92 C86,66 82,50 70,40 C74,26 68,10 50,10 Z',
     tsubo:'M40,8 C40,8 46,24 34,34 C20,44 18,60 26,74 C18,80 16,86 18,92 L82,92 C84,86 82,80 74,74 C82,60 80,44 66,34 C54,24 60,8 60,8 Z'
   };
-  return `<div class="chart-wrap pyramid-wrap"><svg viewBox="0 0 100 100" width="108" height="108"><path d="${shapes[type]}" fill="var(--s1)" fill-opacity="0.85" stroke="var(--accent)" stroke-width="2"/></svg><div class="pyramid-label">${label}</div></div>`;
+  return `<div class="chart-wrap pyramid-wrap"><svg viewBox="0 0 100 100" width="108" height="108"><path d="${shapes[type]}" fill="var(--s1)" fill-opacity="0.85" stroke="var(--accent)" stroke-width="2"/></svg><div class="pyramid-label">${masked?MASK:label}</div></div>`;
 }
-function compassDiagram(p){
+function compassDiagram(p, maskDir){
+  const pt = (dir,label)=> maskDir===dir
+    ? `<div class="compass-pt"><b>${label}</b><span>${MASK}</span></div>`
+    : `<div class="compass-pt"><b>${label}</b><span>${p[dir].name}</span><small>${p[dir].detail}</small></div>`;
   return `<div class="chart-wrap"><div class="compass">
-    <div class="compass-pt"><b>最北端</b><span>${p.n.name}</span><small>${p.n.detail}</small></div>
+    ${pt('n','最北端')}
     <div class="compass-row">
-      <div class="compass-pt"><b>最西端</b><span>${p.w.name}</span><small>${p.w.detail}</small></div>
+      ${pt('w','最西端')}
       <div class="compass-center">日本</div>
-      <div class="compass-pt"><b>最東端</b><span>${p.e.name}</span><small>${p.e.detail}</small></div>
+      ${pt('e','最東端')}
     </div>
-    <div class="compass-pt"><b>最南端</b><span>${p.s.name}</span><small>${p.s.detail}</small></div>
+    ${pt('s','最南端')}
   </div></div>`;
 }
 
 /* ========================= 図の登録（VISUALS） ========================= */
 const VISUALS = {
-  landform: { title:'図2 国土の地形区分構成', render:()=>stackedBar([
+  landform: { title:'図2 国土の地形区分構成', render:(mask)=>stackedBar([
     {label:'山地・丘陵地', value:72.8, c:0},{label:'低地', value:13.8, c:2},{label:'台地', value:11.0, c:3},{label:'その他', value:2.4, c:7}
-  ])},
-  landuse: { title:'図3 国土利用の割合', render:()=>stackedBar([
+  ], mask)},
+  landuse: { title:'図3 国土利用の割合', render:(mask)=>stackedBar([
     {label:'森林', value:66.2, c:2},{label:'その他', value:17.1, c:7},{label:'農地', value:11.4, c:3},{label:'宅地', value:5.3, c:0}
-  ])},
-  agestruct: { title:'図6 年齢別人口構成', render:()=>groupedStackedBars([
+  ], mask)},
+  agestruct: { title:'図6 年齢別人口構成', render:(mask)=>groupedStackedBars([
     {label:'1935年', segments:[{label:'65歳以上',value:4.7,c:7},{label:'15〜64歳',value:58.5,c:2},{label:'0〜14歳',value:36.9,c:0}]},
     {label:'1960年', segments:[{label:'65歳以上',value:5.7,c:7},{label:'15〜64歳',value:64.1,c:2},{label:'0〜14歳',value:30.2,c:0}]},
     {label:'2025年', segments:[{label:'65歳以上',value:29.4,c:7},{label:'15〜64歳',value:59.7,c:2},{label:'0〜14歳',value:10.9,c:0}]},
-  ])},
-  industry: { title:'図8 産業別人口構成（2025年）', render:()=>stackedBar([
+  ], mask && mask.group, mask && mask.seg)},
+  industry: { title:'図8 産業別人口構成（2025年）', render:(mask)=>stackedBar([
     {label:'第3次産業', value:73.4, c:0},{label:'第2次産業', value:22.2, c:2},{label:'第1次産業', value:2.7, c:3},{label:'分類不能', value:1.7, c:7}
-  ])},
-  zairyu: { title:'図9 国籍別在留外国人（413万人）', render:()=>stackedBar([
+  ], mask)},
+  zairyu: { title:'図9 国籍別在留外国人（413万人）', render:(mask)=>stackedBar([
     {label:'中国', value:22.6, c:0},{label:'ベトナム', value:16.5, c:1},{label:'韓国', value:9.9, c:2},{label:'フィリピン', value:8.6, c:3},
     {label:'ネパール', value:7.3, c:4},{label:'インドネシア', value:6.4, c:5},{label:'ブラジル', value:5.1, c:6},{label:'その他', value:23.6, c:7}
-  ])},
-  roudou: { title:'図10 国籍別外国人労働者（257万人）', render:()=>stackedBar([
+  ], mask)},
+  roudou: { title:'図10 国籍別外国人労働者（257万人）', render:(mask)=>stackedBar([
     {label:'ベトナム', value:23.6, c:1},{label:'中国', value:16.8, c:0},{label:'フィリピン', value:10.1, c:3},{label:'ネパール', value:9.2, c:4},
     {label:'ブラジル', value:8.9, c:6},{label:'インドネシア/ミャンマー', value:6.4, c:5},{label:'その他', value:19.8, c:7}
-  ])},
-  metro: { title:'図4 三大都市50キロ圏の人口', render:()=>bubbleChart([
+  ], mask)},
+  metro: { title:'図4 三大都市50キロ圏の人口', render:(mask)=>bubbleChart([
     {label:'東京', value:3451},{label:'大阪', value:1642},{label:'名古屋', value:922}
-  ],'万人')},
-  rain: { title:'図1 各地の年間降水量くらべ', render:()=>barListChart([
+  ],'万人', mask)},
+  rain: { title:'図1 各地の年間降水量くらべ', render:(mask)=>barListChart([
     {label:'高知',value:2666},{label:'金沢',value:2402},{label:'那覇',value:2161},{label:'熊本',value:2007},
     {label:'東京',value:1598},{label:'岡山',value:1143},{label:'札幌',value:1146},{label:'長野',value:965},
-  ],'mm',0)},
+  ],'mm',0, mask)},
   cityarea: { title:'参考 都市の面積', render:()=>barListChart([
     {label:'高山市',value:2178},{label:'浜松市',value:1558},{label:'日光市',value:1450}
   ],'km²',2)},
   citypop: { title:'表11 主な都市の人口', render:()=>barListChart(
     RANKINGS_CITYPOP_ITEMS(), '万人', 0
   )},
-  pyramid1930: { title:'人口ピラミッド 1930年', render:()=>pyramidIcon('fuji','富士山型') },
-  pyramid1960: { title:'人口ピラミッド 1960年', render:()=>pyramidIcon('bell','つりがね型') },
-  pyramid2024: { title:'人口ピラミッド 2024年', render:()=>pyramidIcon('tsubo','つぼ型') },
-  position: { title:'日本の東西南北端', render:()=>compassDiagram({
+  pyramid1930: { title:'人口ピラミッド 1930年', render:(mask)=>pyramidIcon('fuji','富士山型', mask) },
+  pyramid1960: { title:'人口ピラミッド 1960年', render:(mask)=>pyramidIcon('bell','つりがね型', mask) },
+  pyramid2024: { title:'人口ピラミッド 2024年', render:(mask)=>pyramidIcon('tsubo','つぼ型', mask) },
+  position: { title:'日本の東西南北端', render:(mask)=>compassDiagram({
     n:{name:'択捉島', detail:'北緯 約46度'}, e:{name:'南鳥島', detail:'東経 約154度'},
     w:{name:'与那国島', detail:'東経 約123度'}, s:{name:'沖ノ鳥島', detail:'北緯 約20度'}
-  })},
+  }, mask)},
   birthtrend: { title:'図7 出生数の変化', render:()=>barListChart([
     {label:'1973年',value:209.2},{label:'2025年',value:67.1}
   ],'万人',1)},
@@ -491,22 +517,22 @@ const RANKINGS = [
 
 const FACTS = [
   // 位置と面積（超頻出）
-  {id:'f-edge1', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最北端は？', a:'択捉島（北緯約46度）', choices:['択捉島（北緯約46度）','南鳥島（東経約154度）','与那国島（東経約123度）','沖ノ鳥島（北緯約20度）']},
-  {id:'f-edge2', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最東端は？', a:'南鳥島（東経約154度）', choices:['南鳥島（東経約154度）','択捉島（北緯約46度）','与那国島（東経約123度）','沖ノ鳥島（北緯約20度）']},
-  {id:'f-edge3', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最西端は？', a:'与那国島（東経約123度）', choices:['与那国島（東経約123度）','択捉島（北緯約46度）','南鳥島（東経約154度）','沖ノ鳥島（北緯約20度）']},
-  {id:'f-edge4', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最南端は？', a:'沖ノ鳥島（北緯約20度）', choices:['沖ノ鳥島（北緯約20度）','択捉島（北緯約46度）','南鳥島（東経約154度）','与那国島（東経約123度）']},
+  {id:'f-edge1', maskKey:'n', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最北端は？', a:'択捉島（北緯約46度）', choices:['択捉島（北緯約46度）','南鳥島（東経約154度）','与那国島（東経約123度）','沖ノ鳥島（北緯約20度）']},
+  {id:'f-edge2', maskKey:'e', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最東端は？', a:'南鳥島（東経約154度）', choices:['南鳥島（東経約154度）','択捉島（北緯約46度）','与那国島（東経約123度）','沖ノ鳥島（北緯約20度）']},
+  {id:'f-edge3', maskKey:'w', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最西端は？', a:'与那国島（東経約123度）', choices:['与那国島（東経約123度）','択捉島（北緯約46度）','南鳥島（東経約154度）','沖ノ鳥島（北緯約20度）']},
+  {id:'f-edge4', maskKey:'s', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最南端は？', a:'沖ノ鳥島（北緯約20度）', choices:['沖ノ鳥島（北緯約20度）','択捉島（北緯約46度）','南鳥島（東経約154度）','与那国島（東経約123度）']},
   {id:'f-big1', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の国土面積は？', a:'約37.8万km²', choices:['約37.8万km²','約447万km²','約3000km','111']},
   {id:'f-big2', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の領海＋排他的経済水域の面積は？', a:'約447万km²', choices:['約447万km²','約37.8万km²','約3000km','111']},
   {id:'f-big3', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の南北（東西）の距離は約何km？', a:'約3000km', choices:['約3000km','約37.8万km','約447万km','約1万km']},
   {id:'f-big4', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の活火山の数は？', a:'111', choices:['111','47','83','154']},
   {id:'f-ratio', cat:'国土', tier:'ref', group:'日本の位置と面積', q:'四大島の面積比（本州：北海道：九州：四国）は？', a:'12：4：2：1', choices:['12：4：2：1','4：2：1：12','8：4：2：1','12：4：1：2']},
   // 国土利用・地形（超頻出）
-  {id:'f-lu1', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「山地＋丘陵地」の割合は？', a:'72.8%', pool:'landuse'},
-  {id:'f-lu2', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「台地」の割合は？', a:'11.0%', pool:'landuse'},
-  {id:'f-lu3', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「低地」の割合は？', a:'13.8%', pool:'landuse'},
-  {id:'f-lu4', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「農地」の割合は？', a:'11.4%', pool:'landuse'},
-  {id:'f-lu5', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「森林」の割合は？', a:'66.2%', pool:'landuse'},
-  {id:'f-lu6', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「宅地」の割合は？', a:'5.3%', pool:'landuse'},
+  {id:'f-lu1', maskKey:'山地・丘陵地', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「山地＋丘陵地」の割合は？', a:'72.8%', pool:'landuse'},
+  {id:'f-lu2', maskKey:'台地', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「台地」の割合は？', a:'11.0%', pool:'landuse'},
+  {id:'f-lu3', maskKey:'低地', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「低地」の割合は？', a:'13.8%', pool:'landuse'},
+  {id:'f-lu4', maskKey:'農地', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「農地」の割合は？', a:'11.4%', pool:'landuse'},
+  {id:'f-lu5', maskKey:'森林', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「森林」の割合は？', a:'66.2%', pool:'landuse'},
+  {id:'f-lu6', maskKey:'宅地', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「宅地」の割合は？', a:'5.3%', pool:'landuse'},
   // 川・湖
   {id:'f-riv1', cat:'国土', tier:'core', group:'川と湖', q:'流域面積が日本一広い川は？', a:'利根川', choices:['利根川','石狩川','信濃川','木曽川']},
   {id:'f-riv2', cat:'国土', tier:'core', group:'川と湖', q:'流域面積が日本で2番目に広い川は？', a:'石狩川', choices:['石狩川','利根川','信濃川','天竜川']},
@@ -539,23 +565,23 @@ const FACTS = [
   {id:'f-wg6', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'世界最高峰は？', a:'エベレスト山（8848m）', choices:['エベレスト山（8848m）','富士山','大雪山','大山']},
   {id:'f-wg7', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'海岸線が最も長い国は？', a:'カナダ（24.7万km）', choices:['カナダ（24.7万km）','ロシア','アメリカ','中国']},
   // 気候（気候区分の判定は超頻出）
-  {id:'f-cl1', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'北海道の気候（気候区分）の特徴は？', a:'年間降水量1146mm。冬の寒さがきびしい', pool:'climatedesc'},
-  {id:'f-cl2', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'日本海側の気候（気候区分）の特徴は？', a:'年間降水量2402mm。冬でも平均気温は0℃を上回る（冬に雪や雨が多い）', pool:'climatedesc'},
-  {id:'f-cl3', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'中央高地の気候（気候区分）の特徴は？', a:'年間降水量965mm。昼と夜、夏と冬の気温差が大きく、1月の平均気温は0℃を少し下回る', pool:'climatedesc'},
-  {id:'f-cl4', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'瀬戸内地方の気候（気候区分）の特徴は？', a:'年間降水量1143mm。冬でも比較的温暖な日が多い（年間降水量が少ない）', pool:'climatedesc'},
-  {id:'f-cl5', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（関東）の気候（気候区分）の特徴は？', a:'年間降水量1598mm。冬は乾燥した晴天の日が多い', pool:'climatedesc'},
-  {id:'f-cl6', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（南四国・高知）の気候の特徴は？', a:'年間降水量2666mm。冬でも海流の影響で温暖', pool:'climatedesc'},
-  {id:'f-cl7', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（九州・熊本）の気候の特徴は？', a:'年間降水量2007mm。夏は気温の高い日が続く', pool:'climatedesc'},
-  {id:'f-cl8', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'南西諸島の気候（気候区分）の特徴は？', a:'年間降水量2161mm。冬でもあたたかく、1月の平均気温は17℃以上', pool:'climatedesc'},
+  {id:'f-cl1', maskKey:'札幌', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'北海道の気候（気候区分）の特徴は？', a:'年間降水量1146mm。冬の寒さがきびしい', pool:'climatedesc'},
+  {id:'f-cl2', maskKey:'金沢', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'日本海側の気候（気候区分）の特徴は？', a:'年間降水量2402mm。冬でも平均気温は0℃を上回る（冬に雪や雨が多い）', pool:'climatedesc'},
+  {id:'f-cl3', maskKey:'長野', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'中央高地の気候（気候区分）の特徴は？', a:'年間降水量965mm。昼と夜、夏と冬の気温差が大きく、1月の平均気温は0℃を少し下回る', pool:'climatedesc'},
+  {id:'f-cl4', maskKey:'岡山', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'瀬戸内地方の気候（気候区分）の特徴は？', a:'年間降水量1143mm。冬でも比較的温暖な日が多い（年間降水量が少ない）', pool:'climatedesc'},
+  {id:'f-cl5', maskKey:'東京', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（関東）の気候（気候区分）の特徴は？', a:'年間降水量1598mm。冬は乾燥した晴天の日が多い', pool:'climatedesc'},
+  {id:'f-cl6', maskKey:'高知', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（南四国・高知）の気候の特徴は？', a:'年間降水量2666mm。冬でも海流の影響で温暖', pool:'climatedesc'},
+  {id:'f-cl7', maskKey:'熊本', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（九州・熊本）の気候の特徴は？', a:'年間降水量2007mm。夏は気温の高い日が続く', pool:'climatedesc'},
+  {id:'f-cl8', maskKey:'那覇', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'南西諸島の気候（気候区分）の特徴は？', a:'年間降水量2161mm。冬でもあたたかく、1月の平均気温は17℃以上', pool:'climatedesc'},
   // 気候（年間降水量の数字）※参考
-  {id:'f-rain1', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'札幌の年間降水量は？', a:'1146mm', pool:'rain'},
-  {id:'f-rain2', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'金沢の年間降水量は？', a:'2402mm', pool:'rain'},
-  {id:'f-rain3', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'長野の年間降水量は？', a:'965mm', pool:'rain'},
-  {id:'f-rain4', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'岡山の年間降水量は？', a:'1143mm', pool:'rain'},
-  {id:'f-rain5', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'東京の年間降水量は？', a:'1598mm', pool:'rain'},
-  {id:'f-rain6', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'高知の年間降水量は？', a:'2666mm', pool:'rain'},
-  {id:'f-rain7', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'熊本の年間降水量は？', a:'2007mm', pool:'rain'},
-  {id:'f-rain8', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'那覇の年間降水量は？', a:'2161mm', pool:'rain'},
+  {id:'f-rain1', maskKey:'札幌', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'札幌の年間降水量は？', a:'1146mm', pool:'rain'},
+  {id:'f-rain2', maskKey:'金沢', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'金沢の年間降水量は？', a:'2402mm', pool:'rain'},
+  {id:'f-rain3', maskKey:'長野', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'長野の年間降水量は？', a:'965mm', pool:'rain'},
+  {id:'f-rain4', maskKey:'岡山', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'岡山の年間降水量は？', a:'1143mm', pool:'rain'},
+  {id:'f-rain5', maskKey:'東京', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'東京の年間降水量は？', a:'1598mm', pool:'rain'},
+  {id:'f-rain6', maskKey:'高知', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'高知の年間降水量は？', a:'2666mm', pool:'rain'},
+  {id:'f-rain7', maskKey:'熊本', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'熊本の年間降水量は？', a:'2007mm', pool:'rain'},
+  {id:'f-rain8', maskKey:'那覇', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'那覇の年間降水量は？', a:'2161mm', pool:'rain'},
   // 日照時間・年較差（参考データ）
   {id:'f-nk1', cat:'国土', tier:'core', group:'日照時間と年較差', q:'気温の年較差が最も大きい都市（表中）は？（内陸ほど年較差が大きい）', a:'長野（25.8℃）', choices:['長野（25.8℃）','秋田（24.6℃）','岡山（23.5℃）','那覇（11.8℃）']},
   {id:'f-nk2', cat:'国土', tier:'core', group:'日照時間と年較差', q:'気温の年較差が最も小さい都市（表中）は？（海洋の影響が強いほど年較差が小さい）', a:'那覇（11.8℃）', choices:['那覇（11.8℃）','長野（25.8℃）','高知（21.2℃）','釧路（23.0℃）']},
@@ -564,37 +590,37 @@ const FACTS = [
   {id:'f-pop1', cat:'人口', tier:'core', group:'日本の人口の全体像', q:'日本の総人口（2025年10月1日）は？', a:'1億2305万人', choices:['1億2305万人','8232万人','1億9964万人','5245万人']},
   {id:'f-pop2', cat:'人口', tier:'core', group:'日本の人口の全体像', q:'全国の人口密度の平均は？', a:'330人/km²', choices:['330人/km²','64人/km²','6476人/km²','1000人/km²']},
   {id:'f-pop3', cat:'人口', tier:'core', group:'日本の人口の全体像', q:'全国の人口増減率の平均（2023〜2024年）は？（人口減少中）', a:'-0.44%', choices:['-0.44%','0.66%','-1.87%','0.01%']},
-  {id:'f-pop4', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'東京50km圏の人口は？', a:'3451万人', pool:'metro'},
-  {id:'f-pop5', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'大阪50km圏の人口は？', a:'1642万人', pool:'metro'},
-  {id:'f-pop6', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'名古屋50km圏の人口は？', a:'922万人', pool:'metro'},
+  {id:'f-pop4', maskKey:'東京', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'東京50km圏の人口は？', a:'3451万人', pool:'metro'},
+  {id:'f-pop5', maskKey:'大阪', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'大阪50km圏の人口は？', a:'1642万人', pool:'metro'},
+  {id:'f-pop6', maskKey:'名古屋', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'名古屋50km圏の人口は？', a:'922万人', pool:'metro'},
   // 人口ピラミッド・年齢構成（超頻出）
-  {id:'f-pyr1', cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid1930', q:'多産多死・多産少死のころ（1930年頃）の人口ピラミッドの型は？', a:'富士山型', choices:['富士山型','つりがね型','つぼ型','星型']},
-  {id:'f-pyr2', cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid1960', q:'少産少死へ向かう高度経済成長期（1960年頃）の人口ピラミッドの型は？', a:'つりがね型', choices:['つりがね型','富士山型','つぼ型','星型']},
-  {id:'f-pyr3', cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid2024', q:'少子高齢化が進んだ現在（2024年）の人口ピラミッドの型は？', a:'つぼ型', choices:['つぼ型','富士山型','つりがね型','星型']},
-  {id:'f-age1', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の0〜14歳（年少人口）の割合は？', a:'36.9%', pool:'age'},
-  {id:'f-age2', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の15〜64歳（生産年齢人口）の割合は？', a:'58.5%', pool:'age'},
-  {id:'f-age3', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の65歳以上（老年人口）の割合は？', a:'4.7%', pool:'age'},
-  {id:'f-age4', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の0〜14歳（年少人口）の割合は？', a:'30.2%', pool:'age'},
-  {id:'f-age5', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の15〜64歳（生産年齢人口）の割合は？', a:'64.1%', pool:'age'},
-  {id:'f-age6', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の65歳以上（老年人口）の割合は？', a:'5.7%', pool:'age'},
-  {id:'f-age7', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の0〜14歳（年少人口）の割合は？', a:'10.9%', pool:'age'},
-  {id:'f-age8', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の15〜64歳（生産年齢人口）の割合は？', a:'59.7%', pool:'age'},
-  {id:'f-age9', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の65歳以上（老年人口）の割合は？', a:'29.4%', pool:'age'},
+  {id:'f-pyr1', maskKey:true, cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid1930', q:'多産多死・多産少死のころ（1930年頃）の人口ピラミッドの型は？', a:'富士山型', choices:['富士山型','つりがね型','つぼ型','星型']},
+  {id:'f-pyr2', maskKey:true, cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid1960', q:'少産少死へ向かう高度経済成長期（1960年頃）の人口ピラミッドの型は？', a:'つりがね型', choices:['つりがね型','富士山型','つぼ型','星型']},
+  {id:'f-pyr3', maskKey:true, cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid2024', q:'少子高齢化が進んだ現在（2024年）の人口ピラミッドの型は？', a:'つぼ型', choices:['つぼ型','富士山型','つりがね型','星型']},
+  {id:'f-age1', maskKey:{group:'1935年',seg:'0〜14歳'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の0〜14歳（年少人口）の割合は？', a:'36.9%', pool:'age'},
+  {id:'f-age2', maskKey:{group:'1935年',seg:'15〜64歳'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の15〜64歳（生産年齢人口）の割合は？', a:'58.5%', pool:'age'},
+  {id:'f-age3', maskKey:{group:'1935年',seg:'65歳以上'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の65歳以上（老年人口）の割合は？', a:'4.7%', pool:'age'},
+  {id:'f-age4', maskKey:{group:'1960年',seg:'0〜14歳'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の0〜14歳（年少人口）の割合は？', a:'30.2%', pool:'age'},
+  {id:'f-age5', maskKey:{group:'1960年',seg:'15〜64歳'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の15〜64歳（生産年齢人口）の割合は？', a:'64.1%', pool:'age'},
+  {id:'f-age6', maskKey:{group:'1960年',seg:'65歳以上'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の65歳以上（老年人口）の割合は？', a:'5.7%', pool:'age'},
+  {id:'f-age7', maskKey:{group:'2025年',seg:'0〜14歳'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の0〜14歳（年少人口）の割合は？', a:'10.9%', pool:'age'},
+  {id:'f-age8', maskKey:{group:'2025年',seg:'15〜64歳'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の15〜64歳（生産年齢人口）の割合は？', a:'59.7%', pool:'age'},
+  {id:'f-age9', maskKey:{group:'2025年',seg:'65歳以上'}, cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の65歳以上（老年人口）の割合は？', a:'29.4%', pool:'age'},
   // 出生率（少子化の概念は核だが、正確な現在値は参考扱い）
   {id:'f-birth1', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', q:'2025年の合計特殊出生率は？', a:'1.14', choices:['1.14','1.26','1.42','2.07']},
-  {id:'f-birth2', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', chartKey:'birthtrend', q:'1973年の出生数は？', a:'209.2万人', choices:['209.2万人','182.5万人','150.6万人','67.1万人']},
-  {id:'f-birth3', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', chartKey:'birthtrend', q:'2025年の出生数は？', a:'67.1万人', choices:['67.1万人','82.3万人','101.4万人','209.2万人']},
+  {id:'f-birth2', maskKey:'1973年', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', chartKey:'birthtrend', q:'1973年の出生数は？', a:'209.2万人', choices:['209.2万人','182.5万人','150.6万人','67.1万人']},
+  {id:'f-birth3', maskKey:'2025年', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', chartKey:'birthtrend', q:'2025年の出生数は？', a:'67.1万人', choices:['67.1万人','82.3万人','101.4万人','209.2万人']},
   // 産業別人口構成（超頻出：第3次産業が7割超）
-  {id:'f-ind1', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第1次産業（農林水産業）の人口割合は？', a:'2.7%', choices:['2.7%','22.2%','73.4%','1.7%']},
-  {id:'f-ind2', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第2次産業（製造業・建設業など）の人口割合は？', a:'22.2%', choices:['22.2%','2.7%','73.4%','32.2%']},
-  {id:'f-ind3', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第3次産業（商業・サービス業など）の人口割合は？', a:'73.4%', choices:['73.4%','22.2%','2.7%','83.4%']},
+  {id:'f-ind1', maskKey:'第1次産業', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第1次産業（農林水産業）の人口割合は？', a:'2.7%', choices:['2.7%','22.2%','73.4%','1.7%']},
+  {id:'f-ind2', maskKey:'第2次産業', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第2次産業（製造業・建設業など）の人口割合は？', a:'22.2%', choices:['22.2%','2.7%','73.4%','32.2%']},
+  {id:'f-ind3', maskKey:'第3次産業', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第3次産業（商業・サービス業など）の人口割合は？', a:'73.4%', choices:['73.4%','22.2%','2.7%','83.4%']},
   // 外国人（在留外国人の総数と、自動車工業とブラジル人の関係は定番。細かい国籍別割合は参考）
   {id:'f-fg1', cat:'人口', tier:'ref', group:'在留外国人・外国人労働者', q:'在留外国人数（2025年末）は？', a:'413万人', choices:['413万人','257万人','82万人','1230万人']},
-  {id:'f-fg2', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'zairyu', q:'在留外国人の国籍別1位は？', a:'中国（22.6%）', choices:['中国（22.6%）','ベトナム（16.5%）','韓国（9.9%）','フィリピン（8.6%）']},
-  {id:'f-fg3', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'zairyu', q:'在留外国人の国籍別2位は？', a:'ベトナム（16.5%）', choices:['ベトナム（16.5%）','中国（22.6%）','韓国（9.9%）','フィリピン（8.6%）']},
+  {id:'f-fg2', maskKey:'中国', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'zairyu', q:'在留外国人の国籍別1位は？', a:'中国（22.6%）', choices:['中国（22.6%）','ベトナム（16.5%）','韓国（9.9%）','フィリピン（8.6%）']},
+  {id:'f-fg3', maskKey:'ベトナム', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'zairyu', q:'在留外国人の国籍別2位は？', a:'ベトナム（16.5%）', choices:['ベトナム（16.5%）','中国（22.6%）','韓国（9.9%）','フィリピン（8.6%）']},
   {id:'f-fg4', cat:'人口', tier:'ref', group:'在留外国人・外国人労働者', q:'外国人労働者数（2025年10月末）は？', a:'257万人', choices:['257万人','413万人','82万人','630万人']},
-  {id:'f-fg5', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'roudou', q:'外国人労働者の国籍別1位は？（在留外国人1位の中国とは逆転することに注意）', a:'ベトナム（23.6%）', choices:['ベトナム（23.6%）','中国（16.8%）','フィリピン（10.1%）','ネパール（9.2%）']},
-  {id:'f-fg6', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'roudou', q:'外国人労働者の国籍別2位は？', a:'中国（16.8%）', choices:['中国（16.8%）','ベトナム（23.6%）','フィリピン（10.1%）','ネパール（9.2%）']},
+  {id:'f-fg5', maskKey:'ベトナム', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'roudou', q:'外国人労働者の国籍別1位は？（在留外国人1位の中国とは逆転することに注意）', a:'ベトナム（23.6%）', choices:['ベトナム（23.6%）','中国（16.8%）','フィリピン（10.1%）','ネパール（9.2%）']},
+  {id:'f-fg6', maskKey:'中国', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'roudou', q:'外国人労働者の国籍別2位は？', a:'中国（16.8%）', choices:['中国（16.8%）','ベトナム（23.6%）','フィリピン（10.1%）','ネパール（9.2%）']},
   {id:'f-fg7', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', q:'自動車工業がさかんで、ブラジル人が最も多い都道府県は？', a:'愛知県', choices:['愛知県','静岡県','群馬県','三重県']},
   // 県内人口1位都市（県庁所在地とは限らない＝超定番の入試トラップ）
   {id:'f-city1', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'福島県で人口が最も多い都市は？', a:'郡山市', pool:'city'},
@@ -662,20 +688,22 @@ function buildDeck(cats, includeRef){
         cat: t.cat, tier: t.tier||'core', badge: t.title, chartKey: t.chartKey,
         q: (t.title.replace(/^(表|参考|図)\d*\s?/,'')) + 'で ' + item.rank + '位 は？',
         a: item.name,
-        getChoices: ()=>getChoicesForRank(t,item,'rank2name')
+        getChoices: ()=>getChoicesForRank(t,item,'rank2name'),
+        rankTable: t, rankHere: item.rank
       });
       deck.push({
         id: t.id+'-'+item.rank+'-n2r',
         cat: t.cat, tier: t.tier||'core', badge: t.title, chartKey: t.chartKey,
         q: item.name + ' は「' + (t.title.replace(/^(表|参考|図)\d*\s?/,'')) + '」で 何位？',
         a: item.rank+'位',
-        getChoices: ()=>getChoicesForRank(t,item,'name2rank')
+        getChoices: ()=>getChoicesForRank(t,item,'name2rank'),
+        rankTable: t, rankHere: item.rank
       });
     });
   });
   FACTS.filter(f=>cats.includes(f.cat) && (includeRef || f.tier!=='ref')).forEach(f=>{
     deck.push({
-      id: f.id, cat: f.cat, tier: f.tier||'core', badge: f.group, chartKey: f.chartKey,
+      id: f.id, cat: f.cat, tier: f.tier||'core', badge: f.group, chartKey: f.chartKey, maskKey: f.maskKey,
       q: f.q, a: f.a,
       getChoices: ()=>getChoicesForFact(f)
     });
@@ -878,7 +906,8 @@ function renderQuiz(){
   if(!quiz) return `<div class="empty">クイズが開始されていません</div>`;
   const cur = quiz.qs[quiz.idx];
   const pct = Math.round((quiz.idx)/quiz.qs.length*100);
-  const chartHtml = cur.card.chartKey && VISUALS[cur.card.chartKey] ? `<div class="qchart">${VISUALS[cur.card.chartKey].render()}</div>` : '';
+  const showChart = cur.card.chartKey && VISUALS[cur.card.chartKey] && !cur.card.rankTable;
+  const chartHtml = showChart ? `<div class="qchart" id="qchartWrap">${VISUALS[cur.card.chartKey].render(cur.card.maskKey)}</div>` : '';
   return `
     <div class="progressbar"><i style="width:${pct}%"></i></div>
     <div class="qbadge">${cur.card.badge}${cur.card.tier==='ref'?'<span class="tag-ref">参考</span>':''}　（${quiz.idx+1} / ${quiz.qs.length}）</div>
@@ -887,6 +916,7 @@ function renderQuiz(){
     <div class="choices" id="choicesWrap">
       ${cur.choices.map((c,i)=>`<button class="choice" data-i="${i}" onclick="answerQuiz(${i})">${c}</button>`).join('')}
     </div>
+    <div id="rankctxWrap"></div>
     <div class="nextbar" id="nextbar"></div>
   `;
 }
@@ -907,6 +937,13 @@ function answerQuiz(i){
     if(cur.choices[idx]===cur.card.a) btn.classList.add('correct');
     else if(idx===i) btn.classList.add('wrong');
   });
+  if(cur.card.rankTable){
+    document.getElementById('rankctxWrap').innerHTML = rankContextTable(cur.card.rankTable, cur.card.rankHere);
+  }
+  if(cur.card.chartKey && VISUALS[cur.card.chartKey] && !cur.card.rankTable){
+    const el = document.getElementById('qchartWrap');
+    if(el) el.innerHTML = VISUALS[cur.card.chartKey].render();
+  }
   const isLast = quiz.idx === quiz.qs.length-1;
   document.getElementById('nextbar').innerHTML =
     `<button class="btn-primary" onclick="nextQuiz()">${isLast?'結果を見る':'次の問題 →'}</button>`;
@@ -966,27 +1003,30 @@ function renderFc(){
   const fc = state.fc;
   if(!fc) return `<div class="empty">カードが選択されていません</div>`;
   const cur = fc.deck[fc.idx];
+  const showChart = cur.chartKey && VISUALS[cur.chartKey] && !cur.rankTable;
   return `
     <div class="fc-wrap">
       <div class="fc-count">${fc.idx+1} / ${fc.deck.length}</div>
-      ${cur.chartKey && VISUALS[cur.chartKey] ? `<div class="fc-chart">${VISUALS[cur.chartKey].render()}</div>` : ''}
       <div class="card3d" onclick="flipFc()">
         <div class="card-inner ${fc.flipped?'flip':''}" id="cardInner">
           <div class="face front">
             <div class="tag">${cur.badge}</div>
             <div class="main">${cur.q}</div>
+            ${showChart ? VISUALS[cur.chartKey].render(cur.maskKey) : ''}
             <div class="hint">タップしてめくる</div>
           </div>
           <div class="face back">
             <div class="tag">こたえ</div>
             <div class="main">${cur.a}</div>
+            ${showChart ? VISUALS[cur.chartKey].render() : ''}
+            ${cur.rankTable ? rankContextTable(cur.rankTable, cur.rankHere) : ''}
             <div class="hint">タップして戻す</div>
           </div>
         </div>
       </div>
       <div class="fc-btns">
-        <button class="fc-again" onclick="fcResult(false)">もう一度</button>
-        <button class="fc-good" onclick="fcResult(true)">覚えた ✓</button>
+        <button class="fc-good" id="fcGoodBtn" onclick="fcGoodClick()">覚えた ✓</button>
+        <button class="fc-again" onclick="fcResult(false)">次へ</button>
       </div>
       <div class="fc-nav">
         <span onclick="fcPrev()">← 前へ</span>
@@ -995,20 +1035,44 @@ function renderFc(){
     </div>
   `;
 }
-function flipFc(){ state.fc.flipped = !state.fc.flipped; render(); }
+function flipFc(){ state.fc.flipped = !state.fc.flipped; fcResetGoodConfirm(); render(); }
+
+let fcGoodArmed = false;
+let fcGoodTimer = null;
+function fcResetGoodConfirm(){
+  fcGoodArmed = false;
+  if(fcGoodTimer){ clearTimeout(fcGoodTimer); fcGoodTimer = null; }
+}
+function fcGoodClick(){
+  const btn = document.getElementById('fcGoodBtn');
+  if(!fcGoodArmed){
+    fcGoodArmed = true;
+    if(btn){ btn.textContent = 'もう一度タップで確定'; btn.classList.add('confirming'); }
+    fcGoodTimer = setTimeout(()=>{
+      fcGoodArmed = false;
+      if(btn){ btn.textContent = '覚えた ✓'; btn.classList.remove('confirming'); }
+    }, 2500);
+    return;
+  }
+  fcResetGoodConfirm();
+  fcResult(true);
+}
 function fcResult(ok){
   const fc = state.fc;
+  fcResetGoodConfirm();
   markResult(fc.deck[fc.idx].id, ok);
   fcNext();
 }
 function fcNext(){
   const fc = state.fc;
+  fcResetGoodConfirm();
   if(fc.idx < fc.deck.length-1) fc.idx++; else fc.idx = 0;
   fc.flipped = false;
   render();
 }
 function fcPrev(){
   const fc = state.fc;
+  fcResetGoodConfirm();
   fc.idx = fc.idx>0 ? fc.idx-1 : fc.deck.length-1;
   fc.flipped = false;
   render();
@@ -1075,6 +1139,7 @@ function resetStatsConfirm(){
 window.go = go; window.toggleCat = toggleCat; window.toggleRef = toggleRef;
 window.startQuiz = startQuiz; window.answerQuiz = answerQuiz; window.nextQuiz = nextQuiz;
 window.startFc = startFc; window.flipFc = flipFc; window.fcResult = fcResult; window.fcNext = fcNext; window.fcPrev = fcPrev;
+window.fcGoodClick = fcGoodClick;
 window.resetStatsConfirm = resetStatsConfirm;
 window.switchProfile = switchProfile;
 
