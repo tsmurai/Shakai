@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="社会暗記">
+<title>中学受験 社会暗記アプリ（日本の国土・人口）</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --bg:#f4f6f5; --card:#ffffff; --ink:#1c2b27; --sub:#5b6b66; --line:#e2e8e5;
+  --accent:#2f6f5e; --accent2:#e07a3f; --good:#2f8f5b; --bad:#d1495b;
+  --chip:#eef3f1;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#e34948;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#121816; --card:#1b2422; --ink:#eef3f1; --sub:#9db0aa; --line:#2b3634;
+    --accent:#5fb59b; --accent2:#f0975a; --good:#4fbf82; --bad:#f07082; --chip:#22302c;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+    --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  }
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom);
+  overscroll-behavior:none;
+}
+#app{max-width:720px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;}
+header.top{
+  position:sticky; top:0; z-index:10; background:var(--bg);
+  padding:14px 16px 10px; display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid var(--line);
+}
+header.top h1{font-size:15px; margin:0; flex:1; min-width:0; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+header.top{flex-wrap:nowrap;}
+header.top .btn-icon{flex:none; white-space:nowrap;}
+.btn-icon{
+  background:var(--chip); border:none; color:var(--ink); border-radius:12px;
+  padding:8px 12px; font-size:14px; font-weight:600; cursor:pointer;
+}
+main{flex:1; padding:14px 16px 90px;}
+.hero{
+  background:linear-gradient(135deg,var(--accent),#1f4f42); color:#fff; border-radius:20px;
+  padding:22px 20px; margin-bottom:18px;
+}
+.hero h2{margin:0 0 6px; font-size:20px;}
+.hero p{margin:0; opacity:.9; font-size:13.5px; line-height:1.6;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;}
+.stat{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; min-width:0;}
+.stat b{display:block; font-size:20px; color:var(--accent);}
+.stat span{font-size:11px; color:var(--sub);}
+.menu-card{
+  display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line);
+  border-radius:18px; padding:16px; margin-bottom:12px; cursor:pointer; transition:transform .1s;
+}
+.menu-card:active{transform:scale(.98);}
+.menu-card .emoji{font-size:30px; width:46px; text-align:center;}
+.menu-card .txt b{display:block; font-size:16px; margin-bottom:2px;}
+.menu-card .txt span{font-size:12.5px; color:var(--sub);}
+.section-title{font-size:14px; font-weight:700; color:var(--sub); margin:22px 0 10px; letter-spacing:.02em;}
+.chipbar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+.chip{
+  background:var(--chip); border:1px solid var(--line); color:var(--ink); border-radius:999px;
+  padding:7px 14px; font-size:13px; cursor:pointer; font-weight:600;
+}
+.chip.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+input.search{
+  width:100%; padding:12px 14px; border-radius:14px; border:1px solid var(--line);
+  background:var(--card); color:var(--ink); font-size:15px; margin-bottom:14px;
+}
+details.tbl{
+  background:var(--card); border:1px solid var(--line); border-radius:16px; margin-bottom:12px; overflow:hidden;
+}
+details.tbl summary{
+  list-style:none; padding:14px 16px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+  font-weight:700; font-size:15px; gap:8px;
+}
+details.tbl summary .stitle{flex:1;}
+details.tbl summary::-webkit-details-marker{display:none;}
+details.tbl summary .arrow{color:var(--sub); transition:transform .15s; font-size:13px;}
+details.tbl[open] summary .arrow{transform:rotate(90deg);}
+.tag-ref{display:inline-block; font-size:10px; background:var(--chip); color:var(--sub); padding:2px 7px; border-radius:6px; font-weight:700; flex:none;}
+.qbadge .tag-ref{margin-left:8px;}
+.tbl-headline{font-size:12px; color:var(--accent); font-weight:600; padding:0 16px 10px; margin-top:-6px;}
+.tbl-body{padding:0 16px 16px;}
+table{width:100%; border-collapse:collapse; font-size:13.5px;}
+table th{text-align:left; color:var(--sub); font-weight:600; padding:6px 4px; border-bottom:1px solid var(--line); font-size:11.5px;}
+table td{padding:7px 4px; border-bottom:1px solid var(--line);}
+table tr:last-child td{border-bottom:none;}
+.rank{color:var(--accent); font-weight:700; width:34px;}
+.note{font-size:12px; color:var(--sub); margin-top:10px; line-height:1.6; background:var(--chip); padding:8px 10px; border-radius:10px;}
+dl.facts{margin:0; padding:0 16px 16px;}
+dl.facts .fitem{padding:9px 0; border-bottom:1px solid var(--line);}
+dl.facts .fitem:last-child{border-bottom:none;}
+dl.facts dt{font-size:13.5px; color:var(--sub); margin-bottom:3px;}
+dl.facts dd{margin:0; font-size:15px; font-weight:700;}
+
+/* ---- charts ---- */
+.chart-wrap{margin:2px 16px 14px; padding:14px 14px 12px; background:var(--chip); border-radius:14px;}
+.bar100{width:100%; height:28px; display:block; border-radius:4px; overflow:hidden;}
+.legend{display:flex; flex-wrap:wrap; gap:7px 14px; margin-top:10px; font-size:11.5px; color:var(--sub);}
+.legend .lg-item{display:flex; align-items:center; gap:5px;}
+.legend .lg-item i{width:10px; height:10px; border-radius:3px; display:inline-block; flex:none;}
+.gsb{display:flex; gap:22px; justify-content:center; align-items:flex-end; height:170px; margin-bottom:4px;}
+.gsb-col{display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;}
+.gsb-bar{width:48px; height:150px; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; border:1px solid var(--line);}
+.gsb-seg{width:100%;}
+.gsb-label{margin-top:7px; font-size:12px; font-weight:700; color:var(--ink);}
+.bubble-row{display:flex; justify-content:space-around; align-items:flex-end; gap:8px; flex-wrap:wrap; padding-top:6px;}
+.bubble-col{display:flex; flex-direction:column; align-items:center;}
+.bubble-label{margin-top:6px; font-size:12px; text-align:center; color:var(--ink); line-height:1.45;}
+.barlist{display:flex; flex-direction:column; gap:9px; max-height:340px; overflow-y:auto; padding-right:2px;}
+.barlist-row{display:grid; grid-template-columns:78px 1fr 70px; align-items:center; gap:8px; font-size:12px;}
+.bl-label{color:var(--sub); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.bl-track{background:var(--line); border-radius:99px; height:12px; overflow:hidden;}
+.bl-fill{display:block; height:100%; border-radius:99px;}
+.bl-value{text-align:right; font-weight:700; white-space:nowrap;}
+.pyramid-wrap{display:flex; flex-direction:column; align-items:center;}
+.pyramid-label{margin-top:8px; font-size:13px; font-weight:700;}
+.compass{display:flex; flex-direction:column; align-items:center; gap:10px;}
+.compass-row{display:flex; align-items:center; gap:14px;}
+.compass-pt{text-align:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 10px; min-width:92px;}
+.compass-pt b{display:block; font-size:11px; color:var(--accent);}
+.compass-pt span{display:block; font-size:13px; font-weight:700; margin-top:2px;}
+.compass-pt small{display:block; font-size:10px; color:var(--sub); margin-top:2px;}
+.compass-center{width:52px; height:52px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12.5px; flex:none;}
+.qchart{margin:0 0 16px;}
+.qchart .chart-wrap{margin:0;}
+.fc-chart{margin-bottom:12px; width:100%; max-width:480px;}
+.fc-chart .chart-wrap{margin:0;}
+
+/* quiz & flashcard shared */
+.progressbar{height:6px; background:var(--chip); border-radius:99px; overflow:hidden; margin-bottom:16px;}
+.progressbar i{display:block; height:100%; background:var(--accent);}
+.qbadge{font-size:12px; color:var(--accent); font-weight:700; margin-bottom:8px;}
+.qtext{font-size:20px; font-weight:700; line-height:1.5; margin-bottom:18px; min-height:70px;}
+.choices{display:flex; flex-direction:column; gap:10px;}
+.choice{
+  background:var(--card); border:2px solid var(--line); border-radius:14px; padding:14px 16px;
+  font-size:15.5px; text-align:left; cursor:pointer; font-weight:600; color:var(--ink);
+}
+.choice.correct{border-color:var(--good); background:color-mix(in srgb, var(--good) 14%, var(--card));}
+.choice.wrong{border-color:var(--bad); background:color-mix(in srgb, var(--bad) 14%, var(--card));}
+.choice[disabled]{opacity:.55;}
+.choice.correct,.choice.wrong{opacity:1;}
+.nextbar{margin-top:20px; display:flex; justify-content:flex-end;}
+.btn-primary{
+  background:var(--accent); color:#fff; border:none; border-radius:14px; padding:13px 22px;
+  font-size:15px; font-weight:700; cursor:pointer;
+}
+.btn-ghost{
+  background:transparent; color:var(--accent); border:2px solid var(--accent); border-radius:14px; padding:11px 20px;
+  font-size:15px; font-weight:700; cursor:pointer;
+}
+.score-row{display:flex; gap:10px; margin:18px 0;}
+.score-box{flex:1; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; text-align:center;}
+.score-box b{font-size:26px; display:block;}
+.wronglist{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:8px;}
+.wronglist .q{font-size:12.5px; color:var(--sub); margin-bottom:4px;}
+.wronglist .a{font-size:15px; font-weight:700;}
+
+/* flashcard */
+.fc-wrap{display:flex; flex-direction:column; align-items:center;}
+.fc-count{font-size:13px; color:var(--sub); margin-bottom:10px;}
+.card3d{width:100%; max-width:480px; height:auto; min-height:280px; perspective:1400px; margin-bottom:18px;}
+.card-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d; cursor:pointer;}
+.card-inner.flip{transform:rotateY(180deg);}
+.face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:22px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:22px;
+  border:1px solid var(--line); overflow-y:auto;
+}
+.face.front{background:var(--card);}
+.face.back{background:var(--accent); color:#fff; transform:rotateY(180deg);}
+.face.back .chart-wrap{background:rgba(255,255,255,.14);}
+.face.back .lg-item, .face.back .bl-label, .face.back .bl-value, .face.back .compass-pt, .face.back .gsb-label{color:#fff;}
+.face.back .compass-pt{background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25);}
+.face .tag{font-size:11.5px; opacity:.75; margin-bottom:8px; font-weight:700;}
+.face .main{font-size:18px; font-weight:700; line-height:1.5;}
+.face.back .main{font-size:16px;}
+.face .hint{margin-top:12px; font-size:12px; opacity:.7;}
+.fc-btns{display:flex; gap:10px; width:100%; max-width:480px;}
+.fc-btns button{flex:1; padding:14px; border-radius:14px; border:none; font-size:14.5px; font-weight:700; cursor:pointer;}
+.fc-again{background:var(--chip); color:var(--ink);}
+.fc-good{background:var(--good); color:#fff;}
+.fc-nav{display:flex; gap:14px; margin-top:14px; font-size:13px; color:var(--sub);}
+.fc-nav span{cursor:pointer; text-decoration:underline;}
+
+.bottomnav{
+  position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--line);
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom)); display:flex; justify-content:center; z-index:20;
+}
+.bottomnav-inner{display:flex; max-width:720px; width:100%; gap:4px;}
+.navbtn{flex:1; min-width:0; background:none; border:none; color:var(--sub); font-size:10.5px; padding:6px 2px; border-radius:12px; cursor:pointer; font-weight:600;}
+.navbtn .ic{display:block; font-size:18px; margin-bottom:2px;}
+.navbtn.active{color:var(--accent); background:var(--chip);}
+.empty{text-align:center; color:var(--sub); padding:40px 10px; font-size:14px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ========================= チャート部品（SVG/HTML） ========================= */
+function stackedBar(segments){
+  const total = segments.reduce((s,x)=>s+x.value,0);
+  let x = 0;
+  const rects = segments.map((seg,i)=>{
+    const width = seg.value/total*100;
+    const w = Math.max(width - (width>1?0.6:0), 0.2);
+    const r = `<rect x="${x}%" y="0" width="${w}%" height="100%" fill="var(--s${(seg.c!=null?seg.c:i%8)+1})" rx="3"></rect>`;
+    x += width;
+    return r;
+  }).join('');
+  const legend = segments.map((seg,i)=>`<span class="lg-item"><i style="background:var(--s${(seg.c!=null?seg.c:i%8)+1})"></i>${seg.label} ${seg.value}%</span>`).join('');
+  return `<div class="chart-wrap"><svg viewBox="0 0 100 28" preserveAspectRatio="none" class="bar100">${rects}</svg><div class="legend">${legend}</div></div>`;
+}
+function groupedStackedBars(groups){
+  const cols = groups.map(g=>{
+    const segs = g.segments.map((s,i)=>`<div class="gsb-seg" style="height:${s.value}%; background:var(--s${(s.c!=null?s.c:i%8)+1})"></div>`).join('');
+    return `<div class="gsb-col"><div class="gsb-bar">${segs}</div><div class="gsb-label">${g.label}</div></div>`;
+  }).join('');
+  const legend = groups[0].segments.map((s,i)=>`<span class="lg-item"><i style="background:var(--s${(s.c!=null?s.c:i%8)+1})"></i>${s.label}</span>`).join('');
+  return `<div class="chart-wrap"><div class="gsb">${cols}</div><div class="legend">${legend}</div></div>`;
+}
+function bubbleChart(items, unit){
+  const max = Math.max(...items.map(i=>i.value));
+  const maxR = 42;
+  const cols = items.map((it,i)=>{
+    const r = Math.sqrt(it.value/max)*maxR;
+    const size = maxR*2+10;
+    return `<div class="bubble-col"><svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="var(--s${(i%8)+1})" fill-opacity="0.85"></circle></svg><div class="bubble-label">${it.label}<br><b>${it.value}${unit}</b></div></div>`;
+  }).join('');
+  return `<div class="chart-wrap"><div class="bubble-row">${cols}</div></div>`;
+}
+function barListChart(items, unit, colorIdx){
+  const max = Math.max(...items.map(i=>i.value));
+  const c = colorIdx==null?0:colorIdx;
+  const rows = items.map(it=>{
+    const w = (it.value/max*100).toFixed(1);
+    return `<div class="barlist-row"><span class="bl-label">${it.label}</span><span class="bl-track"><span class="bl-fill" style="width:${w}%; background:var(--s${c+1})"></span></span><span class="bl-value">${it.value}${unit}</span></div>`;
+  }).join('');
+  return `<div class="chart-wrap"><div class="barlist">${rows}</div></div>`;
+}
+function pyramidIcon(type,label){
+  const shapes = {
+    fuji: 'M50,8 L90,92 L10,92 Z',
+    bell: 'M50,10 C32,10 26,26 30,40 C18,50 14,66 18,92 L82,92 C86,66 82,50 70,40 C74,26 68,10 50,10 Z',
+    tsubo:'M40,8 C40,8 46,24 34,34 C20,44 18,60 26,74 C18,80 16,86 18,92 L82,92 C84,86 82,80 74,74 C82,60 80,44 66,34 C54,24 60,8 60,8 Z'
+  };
+  return `<div class="chart-wrap pyramid-wrap"><svg viewBox="0 0 100 100" width="108" height="108"><path d="${shapes[type]}" fill="var(--s1)" fill-opacity="0.85" stroke="var(--accent)" stroke-width="2"/></svg><div class="pyramid-label">${label}</div></div>`;
+}
+function compassDiagram(p){
+  return `<div class="chart-wrap"><div class="compass">
+    <div class="compass-pt"><b>最北端</b><span>${p.n.name}</span><small>${p.n.detail}</small></div>
+    <div class="compass-row">
+      <div class="compass-pt"><b>最西端</b><span>${p.w.name}</span><small>${p.w.detail}</small></div>
+      <div class="compass-center">日本</div>
+      <div class="compass-pt"><b>最東端</b><span>${p.e.name}</span><small>${p.e.detail}</small></div>
+    </div>
+    <div class="compass-pt"><b>最南端</b><span>${p.s.name}</span><small>${p.s.detail}</small></div>
+  </div></div>`;
+}
+
+/* ========================= 図の登録（VISUALS） ========================= */
+const VISUALS = {
+  landform: { title:'図2 国土の地形区分構成', render:()=>stackedBar([
+    {label:'山地・丘陵地', value:72.8, c:0},{label:'低地', value:13.8, c:2},{label:'台地', value:11.0, c:3},{label:'その他', value:2.4, c:7}
+  ])},
+  landuse: { title:'図3 国土利用の割合', render:()=>stackedBar([
+    {label:'森林', value:66.2, c:2},{label:'その他', value:17.1, c:7},{label:'農地', value:11.4, c:3},{label:'宅地', value:5.3, c:0}
+  ])},
+  agestruct: { title:'図6 年齢別人口構成', render:()=>groupedStackedBars([
+    {label:'1935年', segments:[{label:'65歳以上',value:4.7,c:7},{label:'15〜64歳',value:58.5,c:2},{label:'0〜14歳',value:36.9,c:0}]},
+    {label:'1960年', segments:[{label:'65歳以上',value:5.7,c:7},{label:'15〜64歳',value:64.1,c:2},{label:'0〜14歳',value:30.2,c:0}]},
+    {label:'2025年', segments:[{label:'65歳以上',value:29.4,c:7},{label:'15〜64歳',value:59.7,c:2},{label:'0〜14歳',value:10.9,c:0}]},
+  ])},
+  industry: { title:'図8 産業別人口構成（2025年）', render:()=>stackedBar([
+    {label:'第3次産業', value:73.4, c:0},{label:'第2次産業', value:22.2, c:2},{label:'第1次産業', value:2.7, c:3},{label:'分類不能', value:1.7, c:7}
+  ])},
+  zairyu: { title:'図9 国籍別在留外国人（413万人）', render:()=>stackedBar([
+    {label:'中国', value:22.6, c:0},{label:'ベトナム', value:16.5, c:1},{label:'韓国', value:9.9, c:2},{label:'フィリピン', value:8.6, c:3},
+    {label:'ネパール', value:7.3, c:4},{label:'インドネシア', value:6.4, c:5},{label:'ブラジル', value:5.1, c:6},{label:'その他', value:23.6, c:7}
+  ])},
+  roudou: { title:'図10 国籍別外国人労働者（257万人）', render:()=>stackedBar([
+    {label:'ベトナム', value:23.6, c:1},{label:'中国', value:16.8, c:0},{label:'フィリピン', value:10.1, c:3},{label:'ネパール', value:9.2, c:4},
+    {label:'ブラジル', value:8.9, c:6},{label:'インドネシア/ミャンマー', value:6.4, c:5},{label:'その他', value:19.8, c:7}
+  ])},
+  metro: { title:'図4 三大都市50キロ圏の人口', render:()=>bubbleChart([
+    {label:'東京', value:3451},{label:'大阪', value:1642},{label:'名古屋', value:922}
+  ],'万人')},
+  rain: { title:'図1 各地の年間降水量くらべ', render:()=>barListChart([
+    {label:'高知',value:2666},{label:'金沢',value:2402},{label:'那覇',value:2161},{label:'熊本',value:2007},
+    {label:'東京',value:1598},{label:'岡山',value:1143},{label:'札幌',value:1146},{label:'長野',value:965},
+  ],'mm',0)},
+  cityarea: { title:'参考 都市の面積', render:()=>barListChart([
+    {label:'高山市',value:2178},{label:'浜松市',value:1558},{label:'日光市',value:1450}
+  ],'km²',2)},
+  citypop: { title:'表11 主な都市の人口', render:()=>barListChart(
+    RANKINGS_CITYPOP_ITEMS(), '万人', 0
+  )},
+  pyramid1930: { title:'人口ピラミッド 1930年', render:()=>pyramidIcon('fuji','富士山型') },
+  pyramid1960: { title:'人口ピラミッド 1960年', render:()=>pyramidIcon('bell','つりがね型') },
+  pyramid2024: { title:'人口ピラミッド 2024年', render:()=>pyramidIcon('tsubo','つぼ型') },
+  position: { title:'日本の東西南北端', render:()=>compassDiagram({
+    n:{name:'択捉島', detail:'北緯 約46度'}, e:{name:'南鳥島', detail:'東経 約154度'},
+    w:{name:'与那国島', detail:'東経 約123度'}, s:{name:'沖ノ鳥島', detail:'北緯 約20度'}
+  })},
+  birthtrend: { title:'図7 出生数の変化', render:()=>barListChart([
+    {label:'1973年',value:209.2},{label:'2025年',value:67.1}
+  ],'万人',1)},
+};
+function RANKINGS_CITYPOP_ITEMS(){
+  const t = RANKINGS.find(r=>r.id==='t11');
+  return t.items.map(i=>({label:i.name, value: parseFloat(i.value)}));
+}
+
+/* =========================================================================
+   データ本体
+   tier: 'core'（入試で問われやすい・必ず覚えるべき事項／既定でクイズ＆カードに出題）
+         'ref' （参考データ／一覧には常に表示するが、クイズ・カードは既定では出題しない）
+   ※ 今後、新しい資料が増えたらこの RANKINGS / FACTS に項目を追加していく。
+      id は他と重複しない接頭辞（t14, f-xxx など）を付ける。
+   ========================================================================= */
+const RANKINGS = [
+  {id:'t1', cat:'国土', domain:'pref', tier:'core', title:'表1 都道府県別 面積順位', headline:'国土面積 約37.8万km²（北海道は北方領土を含む）',
+   note:'1〜7位は10,000km²以上',
+   items:[
+     {rank:1,name:'北海道',value:'83,422km²'},
+     {rank:2,name:'岩手県',value:'15,275km²'},
+     {rank:3,name:'福島県',value:null},
+     {rank:4,name:'長野県',value:null},
+     {rank:5,name:'新潟県',value:null},
+     {rank:6,name:'秋田県',value:null},
+     {rank:7,name:'岐阜県',value:null},
+     {rank:43,name:'神奈川県',value:null},
+     {rank:44,name:'沖縄県',value:null},
+     {rank:45,name:'東京都',value:'2,200km²'},
+     {rank:46,name:'大阪府',value:'1,905km²'},
+     {rank:47,name:'香川県',value:'1,877km²'},
+   ]},
+  {id:'t2', cat:'国土', domain:'river', tier:'core', title:'表2 主な川の長さ', headline:'①〜③は流域面積順位（長さの順位とはズレることに注意）',
+   note:'流域面積順位：①利根川　②石狩川　③信濃川（信濃川は長さ1位だが流域面積は3位）※入試の定番トラップ',
+   items:[
+     {rank:1,name:'信濃川',value:'367km（流域面積③位）'},
+     {rank:2,name:'利根川',value:'322km（流域面積①位）'},
+     {rank:3,name:'石狩川',value:'268km（流域面積②位）'},
+     {rank:4,name:'天塩川',value:null},
+     {rank:5,name:'北上川',value:'249km'},
+     {rank:6,name:'阿武隈川',value:null},
+     {rank:7,name:'最上川',value:null},
+     {rank:8,name:'木曽川',value:null},
+     {rank:9,name:'天竜川',value:null},
+     {rank:10,name:'阿賀野川',value:null},
+   ]},
+  {id:'t3', cat:'国土', domain:'lake', tier:'core', title:'表3 主な湖の面積など', headline:'',
+   note:'最も深い湖：田沢湖（423m・カルデラ湖）／標高が最も高い湖：中禅寺湖（1269m・堰止湖）',
+   items:[
+     {rank:1,name:'琵琶湖',value:'669km²（断層湖）'},
+     {rank:2,name:'霞ヶ浦',value:'（海跡湖）'},
+     {rank:3,name:'サロマ湖',value:'（海跡湖）'},
+     {rank:4,name:'猪苗代湖',value:'（断層湖）'},
+     {rank:5,name:'中海',value:'（海跡湖）'},
+   ]},
+  {id:'t4', cat:'国土', domain:'pref', tier:'core', title:'表4 海岸線の距離', headline:'海岸線総延長　約3万5000km',
+   note:'',
+   items:[
+     {rank:1,name:'北海道',value:'4,440km'},
+     {rank:2,name:'長崎県',value:'4,167km'},
+     {rank:3,name:'鹿児島県',value:null},
+     {rank:4,name:'沖縄県',value:null},
+     {rank:5,name:'愛媛県',value:null},
+   ]},
+  {id:'t5', cat:'国土', domain:'pref', tier:'core', title:'表5 島の数', headline:'日本全体の島の数　14,125',
+   note:'',
+   items:[
+     {rank:1,name:'長崎県',value:'1,479'},
+     {rank:2,name:'北海道',value:'1,473'},
+     {rank:3,name:'鹿児島県',value:null},
+     {rank:4,name:'岩手県',value:null},
+     {rank:5,name:'沖縄県',value:null},
+   ]},
+  {id:'t6', cat:'国土', domain:'island', tier:'core', title:'表6 島の面積（四大島を除く）', headline:'',
+   note:'',
+   items:[
+     {rank:1,name:'択捉島',value:'3,167km²'},
+     {rank:2,name:'国後島',value:null},
+     {rank:3,name:'沖縄島',value:null},
+     {rank:4,name:'佐渡島',value:null},
+     {rank:5,name:'奄美大島',value:null},
+   ]},
+  {id:'t7', cat:'国土', domain:'city', tier:'ref', title:'参考 都市の面積', headline:'', chartKey:'cityarea',
+   note:'',
+   items:[
+     {rank:1,name:'高山市',value:'2,178km²'},
+     {rank:2,name:'浜松市',value:'1,558km²'},
+     {rank:3,name:'日光市',value:'1,450km²'},
+   ]},
+  {id:'t12', cat:'国土', domain:'country', tier:'core', title:'参考 世界の国別面積', headline:'世界の陸地　約1億4600万km²',
+   note:'',
+   items:[
+     {rank:1,name:'ロシア',value:'日本の約45倍'},
+     {rank:2,name:'カナダ',value:null},
+     {rank:3,name:'アメリカ',value:'日本の約26倍'},
+     {rank:4,name:'中国',value:'日本の約25倍'},
+     {rank:5,name:'ブラジル',value:null},
+   ]},
+  {id:'t13', cat:'国土', domain:'country', tier:'core', title:'参考 世界の国別人口', headline:'世界の人口（2025年）　82.32億人',
+   note:'',
+   items:[
+     {rank:1,name:'インド',value:'14.64億人'},
+     {rank:2,name:'中国',value:'14.16億人'},
+     {rank:3,name:'アメリカ',value:'3.47億人'},
+     {rank:4,name:'インドネシア',value:'2.86億人'},
+     {rank:5,name:'パキスタン',value:'2.55億人'},
+     {rank:12,name:'日本',value:'1.23億人'},
+   ]},
+  {id:'t8', cat:'人口', domain:'pref', tier:'core', title:'表8 人口／昼夜間人口比率', headline:'日本の総人口（2025年10月1日）　1億2305万人',
+   note:'昼夜間人口比率が100%を超える＝昼間に人が集まる（通勤・通学者が多い）',
+   items:[
+     {rank:1,name:'東京都',value:'1,425万人／119.2%'},
+     {rank:2,name:'神奈川県',value:'919万人／89.9%'},
+     {rank:3,name:'大阪府',value:'876万人／104.4%'},
+     {rank:4,name:'愛知県',value:'745万人／101.3%'},
+     {rank:5,name:'埼玉県',value:'729万人／87.6%'},
+     {rank:43,name:'福井県',value:'73万人／100.2%'},
+     {rank:44,name:'徳島県',value:'68万人／99.6%'},
+     {rank:45,name:'高知県',value:'64万人／99.9%'},
+     {rank:46,name:'島根県',value:'63万人／100.1%'},
+     {rank:47,name:'鳥取県',value:'52万人／99.8%'},
+   ]},
+  {id:'t9', cat:'人口', domain:'pref', tier:'core', title:'表9 人口密度', headline:'全国平均　330人/km²',
+   note:'',
+   items:[
+     {rank:1,name:'東京都',value:'6,476人/km²'},
+     {rank:2,name:'大阪府',value:'4,600人/km²'},
+     {rank:3,name:'神奈川県',value:null},
+     {rank:4,name:'埼玉県',value:null},
+     {rank:5,name:'愛知県',value:null},
+     {rank:45,name:'秋田県',value:null},
+     {rank:46,name:'岩手県',value:null},
+     {rank:47,name:'北海道',value:'64人/km²'},
+   ]},
+  {id:'t10', cat:'人口', domain:'pref', tier:'core', title:'表10 人口増減率（2023〜2024年）', headline:'全国平均　-0.44%',
+   note:'',
+   items:[
+     {rank:1,name:'東京都',value:'0.66%（増加）'},
+     {rank:2,name:'埼玉県',value:'0.01%（増加）'},
+     {rank:3,name:'神奈川県',value:'-0.05%'},
+     {rank:4,name:'大阪府',value:null},
+     {rank:5,name:'千葉県',value:null},
+     {rank:45,name:'岩手県',value:null},
+     {rank:46,name:'青森県',value:null},
+     {rank:47,name:'秋田県',value:'-1.87%'},
+   ]},
+  {id:'t11', cat:'人口', domain:'city', tier:'core', title:'表11 主な都市の人口', headline:'東京23区以外はすべて政令指定都市', chartKey:'citypop',
+   note:'',
+   items:[
+     {rank:1,name:'東京23区',value:'995万人'},
+     {rank:2,name:'横浜市',value:'375万人'},
+     {rank:3,name:'大阪市',value:'281万人'},
+     {rank:4,name:'名古屋市',value:'235万人'},
+     {rank:5,name:'札幌市',value:'196万人'},
+     {rank:6,name:'福岡市',value:'166万人'},
+     {rank:7,name:'川崎市',value:'156万人'},
+     {rank:8,name:'神戸市',value:'150万人'},
+     {rank:9,name:'京都市',value:'143万人'},
+     {rank:10,name:'さいたま市',value:'135万人'},
+     {rank:11,name:'広島市',value:'117万人'},
+     {rank:12,name:'仙台市',value:'110万人'},
+     {rank:13,name:'千葉市',value:'99万人'},
+     {rank:14,name:'北九州市',value:'90万人'},
+     {rank:15,name:'堺市',value:'80万人'},
+     {rank:16,name:'浜松市',value:'77万人'},
+     {rank:17,name:'新潟市',value:'76万人'},
+     {rank:18,name:'熊本市',value:'73万人'},
+     {rank:19,name:'相模原市',value:'71万人'},
+     {rank:20,name:'岡山市',value:'71万人'},
+     {rank:21,name:'静岡市',value:'66万人'},
+   ]},
+];
+
+const FACTS = [
+  // 位置と面積（超頻出）
+  {id:'f-edge1', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最北端は？', a:'択捉島（北緯約46度）', choices:['択捉島（北緯約46度）','南鳥島（東経約154度）','与那国島（東経約123度）','沖ノ鳥島（北緯約20度）']},
+  {id:'f-edge2', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最東端は？', a:'南鳥島（東経約154度）', choices:['南鳥島（東経約154度）','択捉島（北緯約46度）','与那国島（東経約123度）','沖ノ鳥島（北緯約20度）']},
+  {id:'f-edge3', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最西端は？', a:'与那国島（東経約123度）', choices:['与那国島（東経約123度）','択捉島（北緯約46度）','南鳥島（東経約154度）','沖ノ鳥島（北緯約20度）']},
+  {id:'f-edge4', cat:'国土', tier:'core', group:'日本の位置と面積', chartKey:'position', q:'日本の最南端は？', a:'沖ノ鳥島（北緯約20度）', choices:['沖ノ鳥島（北緯約20度）','択捉島（北緯約46度）','南鳥島（東経約154度）','与那国島（東経約123度）']},
+  {id:'f-big1', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の国土面積は？', a:'約37.8万km²', choices:['約37.8万km²','約447万km²','約3000km','111']},
+  {id:'f-big2', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の領海＋排他的経済水域の面積は？', a:'約447万km²', choices:['約447万km²','約37.8万km²','約3000km','111']},
+  {id:'f-big3', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の南北（東西）の距離は約何km？', a:'約3000km', choices:['約3000km','約37.8万km','約447万km','約1万km']},
+  {id:'f-big4', cat:'国土', tier:'core', group:'日本の位置と面積', q:'日本の活火山の数は？', a:'111', choices:['111','47','83','154']},
+  {id:'f-ratio', cat:'国土', tier:'ref', group:'日本の位置と面積', q:'四大島の面積比（本州：北海道：九州：四国）は？', a:'12：4：2：1', choices:['12：4：2：1','4：2：1：12','8：4：2：1','12：4：1：2']},
+  // 国土利用・地形（超頻出）
+  {id:'f-lu1', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「山地＋丘陵地」の割合は？', a:'72.8%', pool:'landuse'},
+  {id:'f-lu2', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「台地」の割合は？', a:'11.0%', pool:'landuse'},
+  {id:'f-lu3', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landform', q:'国土にしめる「低地」の割合は？', a:'13.8%', pool:'landuse'},
+  {id:'f-lu4', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「農地」の割合は？', a:'11.4%', pool:'landuse'},
+  {id:'f-lu5', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「森林」の割合は？', a:'66.2%', pool:'landuse'},
+  {id:'f-lu6', cat:'国土', tier:'core', group:'国土の地形区分・利用', chartKey:'landuse', q:'国土利用にしめる「宅地」の割合は？', a:'5.3%', pool:'landuse'},
+  // 川・湖
+  {id:'f-riv1', cat:'国土', tier:'core', group:'川と湖', q:'流域面積が日本一広い川は？', a:'利根川', choices:['利根川','石狩川','信濃川','木曽川']},
+  {id:'f-riv2', cat:'国土', tier:'core', group:'川と湖', q:'流域面積が日本で2番目に広い川は？', a:'石狩川', choices:['石狩川','利根川','信濃川','天竜川']},
+  {id:'f-riv3', cat:'国土', tier:'core', group:'川と湖', q:'長さが日本一だが、流域面積は3位の川は？', a:'信濃川', choices:['信濃川','利根川','石狩川','阿賀野川']},
+  {id:'f-riv4', cat:'国土', tier:'core', group:'川と湖', q:'近畿地方で最も長い川は？', a:'熊野川（新宮川）183km', pool:'localriver'},
+  {id:'f-riv5', cat:'国土', tier:'core', group:'川と湖', q:'中国地方で最も長い川は？', a:'江の川', pool:'localriver'},
+  {id:'f-riv6', cat:'国土', tier:'core', group:'川と湖', q:'四国地方で最も長い川は？', a:'四万十川', pool:'localriver'},
+  {id:'f-riv7', cat:'国土', tier:'core', group:'川と湖', q:'九州地方で最も長い川は？', a:'筑後川', pool:'localriver'},
+  {id:'f-lake1', cat:'国土', tier:'core', group:'川と湖', q:'日本一深い湖は？', a:'田沢湖（423m）', choices:['田沢湖（423m）','中禅寺湖（1269m）','琵琶湖（669km²）','霞ヶ浦']},
+  {id:'f-lake2', cat:'国土', tier:'core', group:'川と湖', q:'標高が日本一高い湖は？', a:'中禅寺湖（1269m）', choices:['中禅寺湖（1269m）','田沢湖（423m）','琵琶湖（669km²）','サロマ湖']},
+  {id:'f-lake3', cat:'国土', tier:'core', group:'川と湖', q:'琵琶湖はどんな種類の湖？', a:'断層湖', pool:'laketype'},
+  {id:'f-lake4', cat:'国土', tier:'core', group:'川と湖', q:'霞ヶ浦はどんな種類の湖？', a:'海跡湖', pool:'laketype'},
+  {id:'f-lake5', cat:'国土', tier:'core', group:'川と湖', q:'田沢湖はどんな種類の湖？', a:'カルデラ湖', pool:'laketype'},
+  {id:'f-lake6', cat:'国土', tier:'core', group:'川と湖', q:'中禅寺湖はどんな種類の湖？', a:'堰止湖', pool:'laketype'},
+  // 地方の最高峰
+  {id:'f-mt1', cat:'国土', tier:'core', group:'各地方の最高峰', q:'北海道地方の最高峰は？', a:'大雪山（旭岳）', pool:'mountain'},
+  {id:'f-mt2', cat:'国土', tier:'core', group:'各地方の最高峰', q:'東北地方の最高峰は？', a:'燧ヶ岳', pool:'mountain'},
+  {id:'f-mt3', cat:'国土', tier:'core', group:'各地方の最高峰', q:'関東地方の最高峰は？', a:'日光白根山', pool:'mountain'},
+  {id:'f-mt4', cat:'国土', tier:'core', group:'各地方の最高峰', q:'中部地方の最高峰は？', a:'富士山', pool:'mountain'},
+  {id:'f-mt5', cat:'国土', tier:'core', group:'各地方の最高峰', q:'近畿地方の最高峰は？', a:'八経ヶ岳', pool:'mountain'},
+  {id:'f-mt6', cat:'国土', tier:'core', group:'各地方の最高峰', q:'中国地方の最高峰は？', a:'大山', pool:'mountain'},
+  {id:'f-mt7', cat:'国土', tier:'core', group:'各地方の最高峰', q:'四国地方の最高峰は？', a:'石鎚山', pool:'mountain'},
+  {id:'f-mt8', cat:'国土', tier:'core', group:'各地方の最高峰', q:'九州地方の最高峰は？', a:'宮之浦岳', pool:'mountain'},
+  // 世界の地理（定番）
+  {id:'f-wg1', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'世界最長の川は？', a:'ナイル川（6695km）', choices:['ナイル川（6695km）','アマゾン川（705万km²）','利根川','信濃川']},
+  {id:'f-wg2', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'流域面積が世界最大の川は？', a:'アマゾン川（705万km²）', choices:['アマゾン川（705万km²）','ナイル川（6695km）','利根川','石狩川']},
+  {id:'f-wg3', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'面積が世界最大の湖は？', a:'カスピ海（37.4万km²）', choices:['カスピ海（37.4万km²）','琵琶湖','バイカル湖（1741m）','霞ヶ浦']},
+  {id:'f-wg4', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'世界で最も深い湖は？', a:'バイカル湖（1741m）', choices:['バイカル湖（1741m）','カスピ海（37.4万km²）','田沢湖','中禅寺湖']},
+  {id:'f-wg5', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'世界最大の島は？', a:'グリーンランド（218万km²）', choices:['グリーンランド（218万km²）','択捉島','佐渡島','沖縄島']},
+  {id:'f-wg6', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'世界最高峰は？', a:'エベレスト山（8848m）', choices:['エベレスト山（8848m）','富士山','大雪山','大山']},
+  {id:'f-wg7', cat:'国土', tier:'core', group:'世界の地理（各1位）', q:'海岸線が最も長い国は？', a:'カナダ（24.7万km）', choices:['カナダ（24.7万km）','ロシア','アメリカ','中国']},
+  // 気候（気候区分の判定は超頻出）
+  {id:'f-cl1', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'北海道の気候（気候区分）の特徴は？', a:'年間降水量1146mm。冬の寒さがきびしい', pool:'climatedesc'},
+  {id:'f-cl2', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'日本海側の気候（気候区分）の特徴は？', a:'年間降水量2402mm。冬でも平均気温は0℃を上回る（冬に雪や雨が多い）', pool:'climatedesc'},
+  {id:'f-cl3', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'中央高地の気候（気候区分）の特徴は？', a:'年間降水量965mm。昼と夜、夏と冬の気温差が大きく、1月の平均気温は0℃を少し下回る', pool:'climatedesc'},
+  {id:'f-cl4', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'瀬戸内地方の気候（気候区分）の特徴は？', a:'年間降水量1143mm。冬でも比較的温暖な日が多い（年間降水量が少ない）', pool:'climatedesc'},
+  {id:'f-cl5', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（関東）の気候（気候区分）の特徴は？', a:'年間降水量1598mm。冬は乾燥した晴天の日が多い', pool:'climatedesc'},
+  {id:'f-cl6', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（南四国・高知）の気候の特徴は？', a:'年間降水量2666mm。冬でも海流の影響で温暖', pool:'climatedesc'},
+  {id:'f-cl7', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'太平洋側（九州・熊本）の気候の特徴は？', a:'年間降水量2007mm。夏は気温の高い日が続く', pool:'climatedesc'},
+  {id:'f-cl8', cat:'国土', tier:'core', group:'各地の気候の特徴', chartKey:'rain', q:'南西諸島の気候（気候区分）の特徴は？', a:'年間降水量2161mm。冬でもあたたかく、1月の平均気温は17℃以上', pool:'climatedesc'},
+  // 気候（年間降水量の数字）※参考
+  {id:'f-rain1', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'札幌の年間降水量は？', a:'1146mm', pool:'rain'},
+  {id:'f-rain2', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'金沢の年間降水量は？', a:'2402mm', pool:'rain'},
+  {id:'f-rain3', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'長野の年間降水量は？', a:'965mm', pool:'rain'},
+  {id:'f-rain4', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'岡山の年間降水量は？', a:'1143mm', pool:'rain'},
+  {id:'f-rain5', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'東京の年間降水量は？', a:'1598mm', pool:'rain'},
+  {id:'f-rain6', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'高知の年間降水量は？', a:'2666mm', pool:'rain'},
+  {id:'f-rain7', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'熊本の年間降水量は？', a:'2007mm', pool:'rain'},
+  {id:'f-rain8', cat:'国土', tier:'ref', group:'各地の年間降水量（参考）', chartKey:'rain', q:'那覇の年間降水量は？', a:'2161mm', pool:'rain'},
+  // 日照時間・年較差（参考データ）
+  {id:'f-nk1', cat:'国土', tier:'core', group:'日照時間と年較差', q:'気温の年較差が最も大きい都市（表中）は？（内陸ほど年較差が大きい）', a:'長野（25.8℃）', choices:['長野（25.8℃）','秋田（24.6℃）','岡山（23.5℃）','那覇（11.8℃）']},
+  {id:'f-nk2', cat:'国土', tier:'core', group:'日照時間と年較差', q:'気温の年較差が最も小さい都市（表中）は？（海洋の影響が強いほど年較差が小さい）', a:'那覇（11.8℃）', choices:['那覇（11.8℃）','長野（25.8℃）','高知（21.2℃）','釧路（23.0℃）']},
+  {id:'f-nk3', cat:'国土', tier:'ref', group:'日照時間と年較差', q:'1月の日照時間が最も長い都市（表中）は？', a:'高知（190.7時間）', choices:['高知（190.7時間）','釧路（186.7時間）','岡山（149.0時間）','那覇（93.1時間）']},
+  // 人口の全体像
+  {id:'f-pop1', cat:'人口', tier:'core', group:'日本の人口の全体像', q:'日本の総人口（2025年10月1日）は？', a:'1億2305万人', choices:['1億2305万人','8232万人','1億9964万人','5245万人']},
+  {id:'f-pop2', cat:'人口', tier:'core', group:'日本の人口の全体像', q:'全国の人口密度の平均は？', a:'330人/km²', choices:['330人/km²','64人/km²','6476人/km²','1000人/km²']},
+  {id:'f-pop3', cat:'人口', tier:'core', group:'日本の人口の全体像', q:'全国の人口増減率の平均（2023〜2024年）は？（人口減少中）', a:'-0.44%', choices:['-0.44%','0.66%','-1.87%','0.01%']},
+  {id:'f-pop4', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'東京50km圏の人口は？', a:'3451万人', pool:'metro'},
+  {id:'f-pop5', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'大阪50km圏の人口は？', a:'1642万人', pool:'metro'},
+  {id:'f-pop6', cat:'人口', tier:'core', group:'日本の人口の全体像', chartKey:'metro', q:'名古屋50km圏の人口は？', a:'922万人', pool:'metro'},
+  // 人口ピラミッド・年齢構成（超頻出）
+  {id:'f-pyr1', cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid1930', q:'多産多死・多産少死のころ（1930年頃）の人口ピラミッドの型は？', a:'富士山型', choices:['富士山型','つりがね型','つぼ型','星型']},
+  {id:'f-pyr2', cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid1960', q:'少産少死へ向かう高度経済成長期（1960年頃）の人口ピラミッドの型は？', a:'つりがね型', choices:['つりがね型','富士山型','つぼ型','星型']},
+  {id:'f-pyr3', cat:'人口', tier:'core', group:'人口ピラミッド', chartKey:'pyramid2024', q:'少子高齢化が進んだ現在（2024年）の人口ピラミッドの型は？', a:'つぼ型', choices:['つぼ型','富士山型','つりがね型','星型']},
+  {id:'f-age1', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の0〜14歳（年少人口）の割合は？', a:'36.9%', pool:'age'},
+  {id:'f-age2', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の15〜64歳（生産年齢人口）の割合は？', a:'58.5%', pool:'age'},
+  {id:'f-age3', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1935年の65歳以上（老年人口）の割合は？', a:'4.7%', pool:'age'},
+  {id:'f-age4', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の0〜14歳（年少人口）の割合は？', a:'30.2%', pool:'age'},
+  {id:'f-age5', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の15〜64歳（生産年齢人口）の割合は？', a:'64.1%', pool:'age'},
+  {id:'f-age6', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'1960年の65歳以上（老年人口）の割合は？', a:'5.7%', pool:'age'},
+  {id:'f-age7', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の0〜14歳（年少人口）の割合は？', a:'10.9%', pool:'age'},
+  {id:'f-age8', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の15〜64歳（生産年齢人口）の割合は？', a:'59.7%', pool:'age'},
+  {id:'f-age9', cat:'人口', tier:'core', group:'年齢別人口構成', chartKey:'agestruct', q:'2025年の65歳以上（老年人口）の割合は？', a:'29.4%', pool:'age'},
+  // 出生率（少子化の概念は核だが、正確な現在値は参考扱い）
+  {id:'f-birth1', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', q:'2025年の合計特殊出生率は？', a:'1.14', choices:['1.14','1.26','1.42','2.07']},
+  {id:'f-birth2', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', chartKey:'birthtrend', q:'1973年の出生数は？', a:'209.2万人', choices:['209.2万人','182.5万人','150.6万人','67.1万人']},
+  {id:'f-birth3', cat:'人口', tier:'ref', group:'出生数と合計特殊出生率（参考）', chartKey:'birthtrend', q:'2025年の出生数は？', a:'67.1万人', choices:['67.1万人','82.3万人','101.4万人','209.2万人']},
+  // 産業別人口構成（超頻出：第3次産業が7割超）
+  {id:'f-ind1', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第1次産業（農林水産業）の人口割合は？', a:'2.7%', choices:['2.7%','22.2%','73.4%','1.7%']},
+  {id:'f-ind2', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第2次産業（製造業・建設業など）の人口割合は？', a:'22.2%', choices:['22.2%','2.7%','73.4%','32.2%']},
+  {id:'f-ind3', cat:'人口', tier:'core', group:'産業別人口構成（2025年）', chartKey:'industry', q:'第3次産業（商業・サービス業など）の人口割合は？', a:'73.4%', choices:['73.4%','22.2%','2.7%','83.4%']},
+  // 外国人（在留外国人の総数と、自動車工業とブラジル人の関係は定番。細かい国籍別割合は参考）
+  {id:'f-fg1', cat:'人口', tier:'ref', group:'在留外国人・外国人労働者', q:'在留外国人数（2025年末）は？', a:'413万人', choices:['413万人','257万人','82万人','1230万人']},
+  {id:'f-fg2', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'zairyu', q:'在留外国人の国籍別1位は？', a:'中国（22.6%）', choices:['中国（22.6%）','ベトナム（16.5%）','韓国（9.9%）','フィリピン（8.6%）']},
+  {id:'f-fg3', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'zairyu', q:'在留外国人の国籍別2位は？', a:'ベトナム（16.5%）', choices:['ベトナム（16.5%）','中国（22.6%）','韓国（9.9%）','フィリピン（8.6%）']},
+  {id:'f-fg4', cat:'人口', tier:'ref', group:'在留外国人・外国人労働者', q:'外国人労働者数（2025年10月末）は？', a:'257万人', choices:['257万人','413万人','82万人','630万人']},
+  {id:'f-fg5', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'roudou', q:'外国人労働者の国籍別1位は？（在留外国人1位の中国とは逆転することに注意）', a:'ベトナム（23.6%）', choices:['ベトナム（23.6%）','中国（16.8%）','フィリピン（10.1%）','ネパール（9.2%）']},
+  {id:'f-fg6', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', chartKey:'roudou', q:'外国人労働者の国籍別2位は？', a:'中国（16.8%）', choices:['中国（16.8%）','ベトナム（23.6%）','フィリピン（10.1%）','ネパール（9.2%）']},
+  {id:'f-fg7', cat:'人口', tier:'core', group:'在留外国人・外国人労働者', q:'自動車工業がさかんで、ブラジル人が最も多い都道府県は？', a:'愛知県', choices:['愛知県','静岡県','群馬県','三重県']},
+  // 県内人口1位都市（県庁所在地とは限らない＝超定番の入試トラップ）
+  {id:'f-city1', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'福島県で人口が最も多い都市は？', a:'郡山市', pool:'city'},
+  {id:'f-city2', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'福島県の県庁所在地は？', a:'福島市', pool:'city'},
+  {id:'f-city3', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'茨城県で人口が最も多い都市は？', a:'つくば市', pool:'city'},
+  {id:'f-city4', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'茨城県の県庁所在地は？', a:'水戸市', pool:'city'},
+  {id:'f-city5', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'群馬県で人口が最も多い都市は？', a:'高崎市', pool:'city'},
+  {id:'f-city6', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'群馬県の県庁所在地は？', a:'前橋市', pool:'city'},
+  {id:'f-city7', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'静岡県で人口が最も多い都市は？', a:'浜松市', pool:'city'},
+  {id:'f-city8', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'静岡県の県庁所在地は？', a:'静岡市', pool:'city'},
+  {id:'f-city9', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'三重県で人口が最も多い都市は？', a:'四日市市', pool:'city'},
+  {id:'f-city10', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'三重県の県庁所在地は？', a:'津市', pool:'city'},
+  {id:'f-city11', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'山口県で人口が最も多い都市は？', a:'下関市', pool:'city'},
+  {id:'f-city12', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'山口県の県庁所在地は？', a:'山口市', pool:'city'},
+];
+
+/* ========================= ユーティリティ ========================= */
+function shuffle(arr){const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
+function sample(arr,n){return shuffle(arr).slice(0,n);}
+
+function buildDomainPool(domain){
+  const set = new Set();
+  RANKINGS.filter(t=>t.domain===domain).forEach(t=>t.items.forEach(i=>{ if(i.name) set.add(i.name); }));
+  return set;
+}
+function buildFactPool(key){
+  const set = new Set();
+  buildDomainPool(key).forEach(v=>set.add(v));
+  FACTS.filter(f=>f.pool===key).forEach(f=>{ if(!f.choices) set.add(f.a); });
+  return [...set];
+}
+function getChoicesForFact(f){
+  if(f.choices) return shuffle(f.choices.slice());
+  const pool = buildFactPool(f.pool).filter(x=>x!==f.a);
+  const picks = sample(pool, Math.min(3,pool.length));
+  return shuffle([f.a,...picks]);
+}
+function getChoicesForRank(table, item, mode){
+  if(mode==='rank2name'){
+    let pool = [...buildDomainPool(table.domain)].filter(n=>n!==item.name);
+    if(pool.length<3){
+      pool = RANKINGS.filter(t=>t.cat===table.cat).flatMap(t=>t.items.map(i=>i.name)).filter(n=>n && n!==item.name);
+    }
+    const uniq = [...new Set(pool)];
+    const picks = sample(uniq, Math.min(3,uniq.length));
+    return shuffle([item.name,...picks]);
+  } else {
+    let pool = table.items.filter(i=>i.rank!==item.rank).map(i=>i.rank+'位');
+    if(pool.length<3){
+      pool = [item.rank-1,item.rank+1,item.rank+2,item.rank-2].filter(r=>r>0).map(r=>r+'位');
+    }
+    const uniq = [...new Set(pool)];
+    const picks = sample(uniq, Math.min(3,uniq.length));
+    return shuffle([item.rank+'位',...picks]);
+  }
+}
+
+/* クイズ・フラッシュカード用の統一カードプールを構築。includeRef=trueで参考データも含める */
+function buildDeck(cats, includeRef){
+  const deck = [];
+  RANKINGS.filter(t=>cats.includes(t.cat) && (includeRef || t.tier!=='ref')).forEach(t=>{
+    t.items.forEach(item=>{
+      deck.push({
+        id: t.id+'-'+item.rank+'-r2n',
+        cat: t.cat, tier: t.tier||'core', badge: t.title, chartKey: t.chartKey,
+        q: (t.title.replace(/^(表|参考|図)\d*\s?/,'')) + 'で ' + item.rank + '位 は？',
+        a: item.name,
+        getChoices: ()=>getChoicesForRank(t,item,'rank2name')
+      });
+      deck.push({
+        id: t.id+'-'+item.rank+'-n2r',
+        cat: t.cat, tier: t.tier||'core', badge: t.title, chartKey: t.chartKey,
+        q: item.name + ' は「' + (t.title.replace(/^(表|参考|図)\d*\s?/,'')) + '」で 何位？',
+        a: item.rank+'位',
+        getChoices: ()=>getChoicesForRank(t,item,'name2rank')
+      });
+    });
+  });
+  FACTS.filter(f=>cats.includes(f.cat) && (includeRef || f.tier!=='ref')).forEach(f=>{
+    deck.push({
+      id: f.id, cat: f.cat, tier: f.tier||'core', badge: f.group, chartKey: f.chartKey,
+      q: f.q, a: f.a,
+      getChoices: ()=>getChoicesForFact(f)
+    });
+  });
+  return deck;
+}
+
+/* ========================= 進捗保存(ユーザーごと) ========================= */
+const PROFILES = { trial:{short:'父(テスト)', full:'お父さん（テスト）'}, son:{short:'むすこ', full:'むすこ'} };
+const STORE_KEY = 'shakai_ankiapp_stats_v1';
+function currentProfile(){ return localStorage.getItem('shakai_profile') || 'trial'; }
+function profileStoreKey(){ return STORE_KEY + '__' + currentProfile(); }
+function loadStats(){ try{ return JSON.parse(localStorage.getItem(profileStoreKey()))||{}; }catch(e){ return {}; } }
+function saveStats(s){ localStorage.setItem(profileStoreKey(), JSON.stringify(s)); }
+function switchProfile(){
+  const next = currentProfile()==='trial' ? 'son' : 'trial';
+  localStorage.setItem('shakai_profile', next);
+  render();
+}
+function markResult(id, ok){
+  const s = loadStats();
+  if(!s[id]) s[id] = {seen:0, wrong:0};
+  s[id].seen++; if(!ok) s[id].wrong++;
+  saveStats(s);
+}
+function buildFullIndex(){
+  const map = {};
+  buildDeck(['国土','人口'], true).forEach(c=>{ map[c.id] = c; });
+  return map;
+}
+
+/* ========================= 状態 ========================= */
+const state = {
+  view: 'home',
+  cats: ['国土','人口'],
+  includeRef: false,
+  quiz: null,
+  fc: null,
+};
+
+const root = document.getElementById('app');
+
+/* ========================= ルーター ========================= */
+function go(view){ state.view = view; render(); window.scrollTo(0,0); }
+
+function render(){
+  let html = '';
+  if(state.view==='home') html = renderHome();
+  else if(state.view==='list') html = renderList();
+  else if(state.view==='fc-setup') html = renderFcSetup();
+  else if(state.view==='fc') html = renderFc();
+  else if(state.view==='quiz-setup') html = renderQuizSetup();
+  else if(state.view==='quiz') html = renderQuiz();
+  else if(state.view==='quiz-result') html = renderQuizResult();
+  else if(state.view==='stats') html = renderStats();
+
+  root.innerHTML = `
+    <header class="top">
+      ${state.view!=='home' ? `<button class="btn-icon" onclick="go('home')">← ホーム</button>` : `<h1>📘 社会暗記（日本の国土・人口）</h1>`}
+      ${state.view!=='home' ? `<div style="flex:1"></div>` : ''}
+      <button class="btn-icon" onclick="switchProfile()" title="タップでユーザー切り替え">👤 ${PROFILES[currentProfile()].short}</button>
+    </header>
+    <main>${html}</main>
+    <nav class="bottomnav"><div class="bottomnav-inner">
+      <button class="navbtn ${state.view==='home'?'active':''}" onclick="go('home')"><span class="ic">🏠</span>ホーム</button>
+      <button class="navbtn ${state.view==='list'?'active':''}" onclick="go('list')"><span class="ic">📋</span>一覧</button>
+      <button class="navbtn ${state.view.startsWith('fc')?'active':''}" onclick="go('fc-setup')"><span class="ic">🗂️</span>カード</button>
+      <button class="navbtn ${state.view.startsWith('quiz')?'active':''}" onclick="go('quiz-setup')"><span class="ic">✏️</span>クイズ</button>
+      <button class="navbtn ${state.view==='stats'?'active':''}" onclick="go('stats')"><span class="ic">📊</span>記録</button>
+    </div></nav>
+  `;
+  afterRender();
+}
+
+function afterRender(){
+  if(state.view==='list') attachListSearch();
+}
+
+/* ========================= ホーム ========================= */
+function renderHome(){
+  const totalCards = buildDeck(['国土','人口'], false).length;
+  const stats = loadStats();
+  const doneIds = Object.keys(stats).filter(k=>stats[k].seen>0);
+  const wrongIds = Object.keys(stats).filter(k=>stats[k].wrong>0);
+  return `
+    <div class="hero">
+      <h2>中学受験 社会暗記</h2>
+      <p>日本の国土のデータバンク／日本の人口と都市の資料から、入試で問われやすい暗記事項をまとめました。クイズ・フラッシュカード・一覧の3モードで反復学習でき、正答率や苦手項目は「記録」でいつでも確認できます。資料は今後も追加していきます。</p>
+    </div>
+    <div class="grid3">
+      <div class="stat"><b>${totalCards}</b><span>暗記項目数</span></div>
+      <div class="stat"><b>${doneIds.length}</b><span>学習済み</span></div>
+      <div class="stat"><b>${wrongIds.length}</b><span>苦手項目</span></div>
+    </div>
+    <div class="menu-card" onclick="go('quiz-setup')">
+      <div class="emoji">✏️</div>
+      <div class="txt"><b>クイズモード</b><span>4択でテンポよく実力チェック</span></div>
+    </div>
+    <div class="menu-card" onclick="go('fc-setup')">
+      <div class="emoji">🗂️</div>
+      <div class="txt"><b>フラッシュカード</b><span>タップでめくって覚える</span></div>
+    </div>
+    <div class="menu-card" onclick="go('list')">
+      <div class="emoji">📋</div>
+      <div class="txt"><b>一覧（リスト表示）</b><span>表・図・グラフをそのまま見て確認</span></div>
+    </div>
+    <div class="menu-card" onclick="go('stats')">
+      <div class="emoji">📊</div>
+      <div class="txt"><b>学習記録</b><span>正答率・誤答数から苦手をチェック</span></div>
+    </div>
+  `;
+}
+
+/* ========================= 一覧 ========================= */
+function attachListSearch(){
+  const input = document.getElementById('listSearch');
+  if(!input) return;
+  input.addEventListener('input', ()=>{
+    const kw = input.value.trim();
+    document.querySelectorAll('#listBody details.tbl').forEach(d=>{
+      const hit = d.dataset.text.includes(kw);
+      d.style.display = hit ? '' : 'none';
+      if(kw && hit) d.open = true;
+    });
+  });
+}
+function renderList(){
+  const cats = state.cats;
+  const chip = c => `<button class="chip ${cats.includes(c)?'active':''}" onclick="toggleCat('${c}')">${c}</button>`;
+  let body = '';
+  RANKINGS.filter(t=>cats.includes(t.cat)).forEach(t=>{
+    const searchText = (t.title+' '+t.items.map(i=>i.name).join(' ')).toLowerCase();
+    const chartHtml = t.chartKey && VISUALS[t.chartKey] ? VISUALS[t.chartKey].render() : '';
+    body += `<details class="tbl" data-text="${searchText}">
+      <summary><span class="stitle">${t.title}</span>${t.tier==='ref'?'<span class="tag-ref">参考</span>':''}<span class="arrow">▶</span></summary>
+      ${t.headline?`<div class="tbl-headline">${t.headline}</div>`:''}
+      ${chartHtml}
+      <div class="tbl-body">
+        <table><thead><tr><th>順位</th><th>名前</th><th>数値</th></tr></thead><tbody>
+        ${t.items.map(i=>`<tr><td class="rank">${i.rank}</td><td>${i.name}</td><td>${i.value||'—'}</td></tr>`).join('')}
+        </tbody></table>
+        ${t.note?`<div class="note">${t.note}</div>`:''}
+      </div>
+    </details>`;
+  });
+  const groups = {};
+  FACTS.filter(f=>cats.includes(f.cat)).forEach(f=>{ (groups[f.group] ||= []).push(f); });
+  Object.keys(groups).forEach(g=>{
+    const list = groups[g];
+    const isRef = list.every(f=>f.tier==='ref');
+    const searchText = (g+' '+list.map(f=>f.q+f.a).join(' ')).toLowerCase();
+    const chartKeys = [...new Set(list.map(f=>f.chartKey).filter(Boolean))];
+    const chartsHtml = chartKeys.map(k=>VISUALS[k]?VISUALS[k].render():'').join('');
+    body += `<details class="tbl" data-text="${searchText}">
+      <summary><span class="stitle">${g}</span>${isRef?'<span class="tag-ref">参考</span>':''}<span class="arrow">▶</span></summary>
+      ${chartsHtml}
+      <dl class="facts">
+        ${list.map(f=>`<div class="fitem"><dt>${f.q}</dt><dd>${f.a}</dd></div>`).join('')}
+      </dl>
+    </details>`;
+  });
+  return `
+    <div class="chipbar">${chip('国土')}${chip('人口')}</div>
+    <input class="search" id="listSearch" placeholder="🔍 キーワードで検索（例：琵琶湖）">
+    <div id="listBody">${body || '<div class="empty">表示するカテゴリを選んでください</div>'}</div>
+  `;
+}
+function toggleCat(c){
+  if(state.cats.includes(c)){
+    if(state.cats.length>1) state.cats = state.cats.filter(x=>x!==c);
+  } else state.cats = [...state.cats, c];
+  render();
+}
+function toggleRef(){ state.includeRef = !state.includeRef; render(); }
+
+/* ========================= クイズ ========================= */
+function renderQuizSetup(){
+  const cats = state.cats;
+  const chip = c => `<button class="chip ${cats.includes(c)?'active':''}" onclick="toggleCat('${c}')">${c}</button>`;
+  const deckLen = buildDeck(cats, state.includeRef).length;
+  return `
+    <div class="section-title">クイズ範囲</div>
+    <div class="chipbar">${chip('国土')}${chip('人口')}
+      <button class="chip ${state.includeRef?'active':''}" onclick="toggleRef()">📚 参考データも含める</button>
+    </div>
+    <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目（入試で問われやすい内容が中心）からランダムに10問出題します。関連する図表があるときは問題と一緒に表示されます。</p>
+    <button class="btn-primary" style="width:100%; padding:16px;" onclick="startQuiz()">クイズを始める（10問）</button>
+  `;
+}
+function startQuiz(){
+  const deck = shuffle(buildDeck(state.cats, state.includeRef));
+  const qs = deck.slice(0, Math.min(10, deck.length)).map(card=>({
+    card, choices: card.getChoices(), answered:false, correct:null
+  }));
+  state.quiz = { qs, idx:0, correctCount:0, wrongList:[] };
+  go('quiz');
+}
+function renderQuiz(){
+  const quiz = state.quiz;
+  if(!quiz) return `<div class="empty">クイズが開始されていません</div>`;
+  const cur = quiz.qs[quiz.idx];
+  const pct = Math.round((quiz.idx)/quiz.qs.length*100);
+  const chartHtml = cur.card.chartKey && VISUALS[cur.card.chartKey] ? `<div class="qchart">${VISUALS[cur.card.chartKey].render()}</div>` : '';
+  return `
+    <div class="progressbar"><i style="width:${pct}%"></i></div>
+    <div class="qbadge">${cur.card.badge}${cur.card.tier==='ref'?'<span class="tag-ref">参考</span>':''}　（${quiz.idx+1} / ${quiz.qs.length}）</div>
+    <div class="qtext">${cur.card.q}</div>
+    ${chartHtml}
+    <div class="choices" id="choicesWrap">
+      ${cur.choices.map((c,i)=>`<button class="choice" data-i="${i}" onclick="answerQuiz(${i})">${c}</button>`).join('')}
+    </div>
+    <div class="nextbar" id="nextbar"></div>
+  `;
+}
+function answerQuiz(i){
+  const quiz = state.quiz;
+  const cur = quiz.qs[quiz.idx];
+  if(cur.answered) return;
+  cur.answered = true;
+  const chosen = cur.choices[i];
+  const ok = chosen === cur.card.a;
+  cur.correct = ok;
+  if(ok) quiz.correctCount++;
+  else quiz.wrongList.push(cur.card);
+  markResult(cur.card.id, ok);
+
+  document.querySelectorAll('#choicesWrap .choice').forEach((btn,idx)=>{
+    btn.disabled = true;
+    if(cur.choices[idx]===cur.card.a) btn.classList.add('correct');
+    else if(idx===i) btn.classList.add('wrong');
+  });
+  const isLast = quiz.idx === quiz.qs.length-1;
+  document.getElementById('nextbar').innerHTML =
+    `<button class="btn-primary" onclick="nextQuiz()">${isLast?'結果を見る':'次の問題 →'}</button>`;
+}
+function nextQuiz(){
+  const quiz = state.quiz;
+  if(quiz.idx < quiz.qs.length-1){ quiz.idx++; render(); }
+  else go('quiz-result');
+}
+function renderQuizResult(){
+  const quiz = state.quiz;
+  if(!quiz) return `<div class="empty">結果がありません</div>`;
+  const total = quiz.qs.length;
+  return `
+    <div class="score-row">
+      <div class="score-box"><b style="color:var(--good)">${quiz.correctCount}</b>正解</div>
+      <div class="score-box"><b style="color:var(--bad)">${total-quiz.correctCount}</b>不正解</div>
+      <div class="score-box"><b>${Math.round(quiz.correctCount/total*100)}%</b>正答率</div>
+    </div>
+    ${quiz.wrongList.length ? `<div class="section-title">まちがえた問題</div>` +
+      quiz.wrongList.map(c=>`<div class="wronglist"><div class="q">${c.q}</div><div class="a" style="color:var(--good)">${c.a}</div></div>`).join('')
+      : `<div class="empty">🎉 全問正解でした！</div>`}
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button class="btn-ghost" style="flex:1" onclick="go('quiz-setup')">設定に戻る</button>
+      <button class="btn-primary" style="flex:1" onclick="startQuiz()">もう一度</button>
+    </div>
+  `;
+}
+
+/* ========================= フラッシュカード ========================= */
+function renderFcSetup(){
+  const cats = state.cats;
+  const chip = c => `<button class="chip ${cats.includes(c)?'active':''}" onclick="toggleCat('${c}')">${c}</button>`;
+  const deckLen = buildDeck(cats, state.includeRef).length;
+  return `
+    <div class="section-title">カード範囲</div>
+    <div class="chipbar">${chip('国土')}${chip('人口')}
+      <button class="chip ${state.includeRef?'active':''}" onclick="toggleRef()">📚 参考データも含める</button>
+    </div>
+    <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目</p>
+    <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startFc(false)">全カードで開始</button>
+    <button class="btn-ghost" style="width:100%; padding:14px;" onclick="startFc(true)">苦手カードだけで開始</button>
+  `;
+}
+function startFc(onlyWrong){
+  let deck = buildDeck(state.cats, state.includeRef);
+  if(onlyWrong){
+    const stats = loadStats();
+    deck = deck.filter(c=> stats[c.id] && stats[c.id].wrong>0);
+    if(deck.length===0){ alert('苦手カードはまだありません。まずはクイズかフラッシュカードに挑戦してみてください。'); return; }
+  }
+  deck = shuffle(deck);
+  state.fc = { deck, idx:0, flipped:false };
+  go('fc');
+}
+function renderFc(){
+  const fc = state.fc;
+  if(!fc) return `<div class="empty">カードが選択されていません</div>`;
+  const cur = fc.deck[fc.idx];
+  return `
+    <div class="fc-wrap">
+      <div class="fc-count">${fc.idx+1} / ${fc.deck.length}</div>
+      ${cur.chartKey && VISUALS[cur.chartKey] ? `<div class="fc-chart">${VISUALS[cur.chartKey].render()}</div>` : ''}
+      <div class="card3d" onclick="flipFc()">
+        <div class="card-inner ${fc.flipped?'flip':''}" id="cardInner">
+          <div class="face front">
+            <div class="tag">${cur.badge}</div>
+            <div class="main">${cur.q}</div>
+            <div class="hint">タップしてめくる</div>
+          </div>
+          <div class="face back">
+            <div class="tag">こたえ</div>
+            <div class="main">${cur.a}</div>
+            <div class="hint">タップして戻す</div>
+          </div>
+        </div>
+      </div>
+      <div class="fc-btns">
+        <button class="fc-again" onclick="fcResult(false)">もう一度</button>
+        <button class="fc-good" onclick="fcResult(true)">覚えた ✓</button>
+      </div>
+      <div class="fc-nav">
+        <span onclick="fcPrev()">← 前へ</span>
+        <span onclick="fcNext()">次へ →</span>
+      </div>
+    </div>
+  `;
+}
+function flipFc(){ state.fc.flipped = !state.fc.flipped; render(); }
+function fcResult(ok){
+  const fc = state.fc;
+  markResult(fc.deck[fc.idx].id, ok);
+  fcNext();
+}
+function fcNext(){
+  const fc = state.fc;
+  if(fc.idx < fc.deck.length-1) fc.idx++; else fc.idx = 0;
+  fc.flipped = false;
+  render();
+}
+function fcPrev(){
+  const fc = state.fc;
+  fc.idx = fc.idx>0 ? fc.idx-1 : fc.deck.length-1;
+  fc.flipped = false;
+  render();
+}
+
+/* ========================= 学習記録（フィードバック） ========================= */
+function renderStats(){
+  const stats = loadStats();
+  const index = buildFullIndex();
+  const ids = Object.keys(stats).filter(id=>stats[id].seen>0 && index[id]);
+  if(ids.length===0){
+    return `<div class="empty">「${PROFILES[currentProfile()].full}」の学習記録はまだありません。<br>クイズかフラッシュカードに挑戦してみましょう。</div>`;
+  }
+  let totalSeen=0, totalWrong=0;
+  const byCat = {'国土':{seen:0,wrong:0}, '人口':{seen:0,wrong:0}};
+  ids.forEach(id=>{
+    const s = stats[id]; const c = index[id];
+    totalSeen += s.seen; totalWrong += s.wrong;
+    if(byCat[c.cat]){ byCat[c.cat].seen += s.seen; byCat[c.cat].wrong += s.wrong; }
+  });
+  const acc = totalSeen? Math.round((totalSeen-totalWrong)/totalSeen*100) : 0;
+  const wrongRate = totalSeen? Math.round(totalWrong/totalSeen*100) : 0;
+
+  const worst = ids.map(id=>({id, card:index[id], seen:stats[id].seen, wrong:stats[id].wrong}))
+    .filter(x=>x.wrong>0)
+    .sort((a,b)=> (b.wrong/b.seen) - (a.wrong/a.seen) || b.wrong-a.wrong)
+    .slice(0,15);
+
+  const catRows = Object.keys(byCat).map(c=>{
+    const b = byCat[c];
+    if(b.seen===0) return '';
+    const a = Math.round((b.seen-b.wrong)/b.seen*100);
+    return `<div class="barlist-row"><span class="bl-label">${c}（${b.seen}問）</span><span class="bl-track"><span class="bl-fill" style="width:${a}%; background:var(--good)"></span></span><span class="bl-value">${a}%</span></div>`;
+  }).join('');
+
+  return `
+    <div class="section-title">「${PROFILES[currentProfile()].full}」の学習記録</div>
+    <div class="score-row">
+      <div class="score-box"><b>${totalSeen}</b>解答数</div>
+      <div class="score-box"><b style="color:var(--good)">${acc}%</b>正答率</div>
+      <div class="score-box"><b style="color:var(--bad)">${totalWrong}</b>誤答数（${wrongRate}%）</div>
+    </div>
+    <div class="section-title">カテゴリ別 正答率</div>
+    <div class="chart-wrap"><div class="barlist">${catRows}</div></div>
+    <div class="section-title">苦手ランキング（誤答が多い順・上位15）</div>
+    ${worst.length ? worst.map(w=>{
+        const a = Math.round((w.seen-w.wrong)/w.seen*100);
+        return `<div class="wronglist"><div class="q">${w.card.badge}　出題${w.seen}回／誤答${w.wrong}回（正答率${a}%）</div><div class="a" style="color:var(--bad)">${w.card.q}</div></div>`;
+      }).join('')
+      : `<div class="empty">まだ誤答はありません 🎉</div>`}
+    <div style="margin-top:22px;">
+      <button class="btn-ghost" style="width:100%; padding:14px;" onclick="resetStatsConfirm()">学習記録をリセット</button>
+    </div>
+  `;
+}
+function resetStatsConfirm(){
+  if(confirm('「'+PROFILES[currentProfile()].full+'」の学習記録（正答率・誤答数など）をすべて削除します。よろしいですか？')){
+    localStorage.removeItem(profileStoreKey());
+    go('stats');
+  }
+}
+
+/* ========================= 初期化 ========================= */
+window.go = go; window.toggleCat = toggleCat; window.toggleRef = toggleRef;
+window.startQuiz = startQuiz; window.answerQuiz = answerQuiz; window.nextQuiz = nextQuiz;
+window.startFc = startFc; window.flipFc = flipFc; window.fcResult = fcResult; window.fcNext = fcNext; window.fcPrev = fcPrev;
+window.resetStatsConfirm = resetStatsConfirm;
+window.switchProfile = switchProfile;
+
+render();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
