@@ -1,4 +1,6 @@
-# 資料アップロードの方法
+# 📘 社会 暗記アプリ ― 資料アップロードの方法
+
+> 漢字アプリの資料アップロードをお探しの場合はこちら → [📝 漢字アプリのアップロード手順](https://github.com/tsmurai/Kanji/blob/main/UPLOAD_INSTRUCTIONS.md)
 
 とても簡単です。新しい暗記資料(写真やPDF)ができたら、GitHubの「Upload files」ボタンで送るだけです。
 
