@@ -181,14 +181,15 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 /* flashcard */
 .fc-wrap{display:flex; flex-direction:column; align-items:center;}
 .fc-count{font-size:13px; color:var(--sub); margin-bottom:10px;}
-.card3d{width:100%; max-width:480px; height:auto; min-height:280px; perspective:1400px; margin-bottom:18px;}
+.card3d{width:100%; max-width:480px; height:62vh; min-height:320px; max-height:560px; perspective:1400px; margin-bottom:18px;}
 .card-inner{position:relative; width:100%; height:100%; transition:transform .5s; transform-style:preserve-3d; cursor:pointer;}
 .card-inner.flip{transform:rotateY(180deg);}
 .face{
   position:absolute; inset:0; backface-visibility:hidden; border-radius:22px;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:22px;
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding:24px 22px;
   border:1px solid var(--line); overflow-y:auto;
 }
+.face .spacer{flex:1 0 12px;}
 .face.front{background:var(--card);}
 .face.back{background:var(--accent); color:#fff; transform:rotateY(180deg);}
 .face.back .chart-wrap{background:rgba(255,255,255,.14);}
@@ -1046,6 +1047,7 @@ function renderFc(){
             <div class="main">${cur.q}</div>
             ${showChart ? chart.render(cur.maskKey) : ''}
             ${showPlaceholder ? `<div class="chart-wrap chart-hidden">📊 図は裏面で表示されます</div>` : ''}
+            <div class="spacer"></div>
             <div class="hint">タップしてめくる</div>
           </div>
           <div class="face back">
@@ -1053,6 +1055,7 @@ function renderFc(){
             <div class="main">${cur.a}</div>
             ${(showChart||showPlaceholder) ? chart.render() : ''}
             ${cur.rankTable ? rankContextTable(cur.rankTable, cur.rankHere) : ''}
+            <div class="spacer"></div>
             <div class="hint">タップして戻す</div>
           </div>
         </div>
