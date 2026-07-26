@@ -740,16 +740,20 @@ function buildDeck(cats, includeRef){
 }
 
 /* ========================= 進捗保存(ユーザーごと) ========================= */
-const PROFILES = { trial:{short:'父(テスト)', full:'お父さん（テスト）'}, son:{short:'むすこ', full:'むすこ'} };
+const PROFILES = {
+  tsu:  {short:'Tsu',  full:'Tsu',  emoji:'👨'},
+  taku: {short:'Taku', full:'Taku', emoji:'🧑‍🎓'},
+  tomo: {short:'Tomo', full:'Tomo', emoji:'👩'},
+};
 const STORE_KEY = 'shakai_ankiapp_stats_v1';
-function currentProfile(){ return localStorage.getItem('shakai_profile') || 'trial'; }
+function currentProfile(){ return localStorage.getItem('shakai_profile'); }
 function profileStoreKey(){ return STORE_KEY + '__' + currentProfile(); }
 function loadStats(){ try{ return JSON.parse(localStorage.getItem(profileStoreKey()))||{}; }catch(e){ return {}; } }
 function saveStats(s){ localStorage.setItem(profileStoreKey(), JSON.stringify(s)); }
-function switchProfile(){
-  const next = currentProfile()==='trial' ? 'son' : 'trial';
-  localStorage.setItem('shakai_profile', next);
-  render();
+function openUserSelect(){ go('user-select'); }
+function selectProfile(id){
+  localStorage.setItem('shakai_profile', id);
+  go('home');
 }
 function markResult(id, ok){
   const s = loadStats();
@@ -778,6 +782,17 @@ const root = document.getElementById('app');
 function go(view){ state.view = view; render(); window.scrollTo(0,0); }
 
 function render(){
+  if(state.view!=='user-select' && !currentProfile()){ state.view = 'user-select'; }
+
+  if(state.view==='user-select'){
+    root.innerHTML = `
+      <header class="top"><h1>📘 社会暗記（日本の国土・人口）</h1></header>
+      <main>${renderUserSelect()}</main>
+    `;
+    afterRender();
+    return;
+  }
+
   let html = '';
   if(state.view==='home') html = renderHome();
   else if(state.view==='list') html = renderList();
@@ -788,11 +803,12 @@ function render(){
   else if(state.view==='quiz-result') html = renderQuizResult();
   else if(state.view==='stats') html = renderStats();
 
+  const prof = PROFILES[currentProfile()] || {short:'?'};
   root.innerHTML = `
     <header class="top">
       ${state.view!=='home' ? `<button class="btn-icon" onclick="go('home')">← ホーム</button>` : `<h1>📘 社会暗記（日本の国土・人口）</h1>`}
       ${state.view!=='home' ? `<div style="flex:1"></div>` : ''}
-      <button class="btn-icon" onclick="switchProfile()" title="タップでユーザー切り替え">👤 ${PROFILES[currentProfile()].short}</button>
+      <button class="btn-icon" onclick="openUserSelect()" title="タップでユーザー切り替え">👤 ${prof.short}</button>
     </header>
     <main>${html}</main>
     <nav class="bottomnav"><div class="bottomnav-inner">
@@ -804,6 +820,22 @@ function render(){
     </div></nav>
   `;
   afterRender();
+}
+function renderUserSelect(){
+  const cards = Object.keys(PROFILES).map(id=>{
+    const p = PROFILES[id];
+    return `<div class="menu-card" onclick="selectProfile('${id}')">
+      <div class="emoji">${p.emoji}</div>
+      <div class="txt"><b>${p.full}</b><span>このユーザーとして学習する</span></div>
+    </div>`;
+  }).join('');
+  return `
+    <div class="hero">
+      <h2>だれとして学習しますか？</h2>
+      <p>選んだユーザーごとに、正答率や苦手項目が別々に記録されます。</p>
+    </div>
+    ${cards}
+  `;
 }
 
 function afterRender(){
@@ -1177,7 +1209,7 @@ window.startQuiz = startQuiz; window.answerQuiz = answerQuiz; window.nextQuiz = 
 window.startFc = startFc; window.flipFc = flipFc; window.fcResult = fcResult; window.fcNext = fcNext; window.fcPrev = fcPrev;
 window.fcGoodClick = fcGoodClick;
 window.resetStatsConfirm = resetStatsConfirm;
-window.switchProfile = switchProfile;
+window.openUserSelect = openUserSelect; window.selectProfile = selectProfile;
 
 render();
 
