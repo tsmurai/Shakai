@@ -73,6 +73,9 @@ main{flex:1; padding:14px 16px 90px;}
   padding:7px 14px; font-size:13px; cursor:pointer; font-weight:600;
 }
 .chip.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+.userpicker{display:flex; gap:8px; margin-bottom:20px;}
+.userchip{flex:1; background:var(--card); border:2px solid var(--line); color:var(--ink); border-radius:14px; padding:12px 8px; font-size:14px; font-weight:700; cursor:pointer;}
+.userchip.active{background:var(--accent); color:#fff; border-color:var(--accent);}
 input.search{
   width:100%; padding:12px 14px; border-radius:14px; border:1px solid var(--line);
   background:var(--card); color:var(--ink); font-size:15px; margin-bottom:14px;
@@ -750,7 +753,6 @@ function currentProfile(){ return localStorage.getItem('shakai_profile'); }
 function profileStoreKey(){ return STORE_KEY + '__' + currentProfile(); }
 function loadStats(){ try{ return JSON.parse(localStorage.getItem(profileStoreKey()))||{}; }catch(e){ return {}; } }
 function saveStats(s){ localStorage.setItem(profileStoreKey(), JSON.stringify(s)); }
-function openUserSelect(){ go('user-select'); }
 function selectProfile(id){
   localStorage.setItem('shakai_profile', id);
   go('home');
@@ -782,16 +784,7 @@ const root = document.getElementById('app');
 function go(view){ state.view = view; render(); window.scrollTo(0,0); }
 
 function render(){
-  if(state.view!=='user-select' && !currentProfile()){ state.view = 'user-select'; }
-
-  if(state.view==='user-select'){
-    root.innerHTML = `
-      <header class="top"><h1>📘 社会暗記（日本の国土・人口）</h1></header>
-      <main>${renderUserSelect()}</main>
-    `;
-    afterRender();
-    return;
-  }
+  if(state.view!=='home' && !currentProfile()){ state.view = 'home'; }
 
   let html = '';
   if(state.view==='home') html = renderHome();
@@ -803,12 +796,12 @@ function render(){
   else if(state.view==='quiz-result') html = renderQuizResult();
   else if(state.view==='stats') html = renderStats();
 
-  const prof = PROFILES[currentProfile()] || {short:'?'};
+  const prof = PROFILES[currentProfile()];
   root.innerHTML = `
     <header class="top">
       ${state.view!=='home' ? `<button class="btn-icon" onclick="go('home')">← ホーム</button>` : `<h1>📘 社会暗記（日本の国土・人口）</h1>`}
       ${state.view!=='home' ? `<div style="flex:1"></div>` : ''}
-      <button class="btn-icon" onclick="openUserSelect()" title="タップでユーザー切り替え">👤 ${prof.short}</button>
+      ${prof ? `<button class="btn-icon" onclick="go('home')" title="ホームでユーザー切り替え">👤 ${prof.short}</button>` : ''}
     </header>
     <main>${html}</main>
     <nav class="bottomnav"><div class="bottomnav-inner">
@@ -821,22 +814,6 @@ function render(){
   `;
   afterRender();
 }
-function renderUserSelect(){
-  const cards = Object.keys(PROFILES).map(id=>{
-    const p = PROFILES[id];
-    return `<div class="menu-card" onclick="selectProfile('${id}')">
-      <div class="emoji">${p.emoji}</div>
-      <div class="txt"><b>${p.full}</b><span>このユーザーとして学習する</span></div>
-    </div>`;
-  }).join('');
-  return `
-    <div class="hero">
-      <h2>だれとして学習しますか？</h2>
-      <p>選んだユーザーごとに、正答率や苦手項目が別々に記録されます。</p>
-    </div>
-    ${cards}
-  `;
-}
 
 function afterRender(){
   if(state.view==='list') attachListSearch();
@@ -844,11 +821,33 @@ function afterRender(){
 
 /* ========================= ホーム ========================= */
 function renderHome(){
+  const cur = currentProfile();
+  const picker = `
+    <div class="section-title">だれとして学習しますか？</div>
+    <div class="userpicker">
+      ${Object.keys(PROFILES).map(id=>{
+        const p = PROFILES[id];
+        return `<button class="userchip ${id===cur?'active':''}" onclick="selectProfile('${id}')">${p.emoji} ${p.short}</button>`;
+      }).join('')}
+    </div>
+  `;
+
+  if(!cur){
+    return `
+      <div class="hero">
+        <h2>中学受験 社会暗記</h2>
+        <p>日本の国土のデータバンク／日本の人口と都市の資料から、入試で問われやすい暗記事項をまとめました。まずは上からユーザーを選んでください。選んだユーザーごとに正答率や苦手項目が別々に記録されます。</p>
+      </div>
+      ${picker}
+    `;
+  }
+
   const totalCards = buildDeck(['国土','人口'], false).length;
   const stats = loadStats();
   const doneIds = Object.keys(stats).filter(k=>stats[k].seen>0);
   const wrongIds = Object.keys(stats).filter(k=>stats[k].wrong>0);
   return `
+    ${picker}
     <div class="hero">
       <h2>中学受験 社会暗記</h2>
       <p>日本の国土のデータバンク／日本の人口と都市の資料から、入試で問われやすい暗記事項をまとめました。クイズ・フラッシュカード・一覧の3モードで反復学習でき、正答率や苦手項目は「記録」でいつでも確認できます。資料は今後も追加していきます。</p>
@@ -1209,7 +1208,7 @@ window.startQuiz = startQuiz; window.answerQuiz = answerQuiz; window.nextQuiz = 
 window.startFc = startFc; window.flipFc = flipFc; window.fcResult = fcResult; window.fcNext = fcNext; window.fcPrev = fcPrev;
 window.fcGoodClick = fcGoodClick;
 window.resetStatsConfirm = resetStatsConfirm;
-window.openUserSelect = openUserSelect; window.selectProfile = selectProfile;
+window.selectProfile = selectProfile;
 
 render();
 
