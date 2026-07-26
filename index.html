@@ -966,8 +966,8 @@ function renderQuiz(){
   const cur = quiz.qs[quiz.idx];
   const pct = Math.round((quiz.idx)/quiz.qs.length*100);
   const chart = cur.card.chartKey && VISUALS[cur.card.chartKey];
-  const showChart = chart && !cur.card.rankTable && !chart.hideUntilAnswered;
-  const showPlaceholder = chart && !cur.card.rankTable && chart.hideUntilAnswered;
+  const showChart = false;
+  const showPlaceholder = chart && !cur.card.rankTable;
   const chartHtml = showChart ? `<div class="qchart" id="qchartWrap">${chart.render(cur.card.maskKey)}</div>`
     : showPlaceholder ? `<div class="qchart" id="qchartWrap"><div class="chart-wrap chart-hidden">📊 図は回答後に表示されます</div></div>` : '';
   return `
@@ -1066,8 +1066,8 @@ function renderFc(){
   if(!fc) return `<div class="empty">カードが選択されていません</div>`;
   const cur = fc.deck[fc.idx];
   const chart = cur.chartKey && VISUALS[cur.chartKey];
-  const showChart = chart && !cur.rankTable && !chart.hideUntilAnswered;
-  const showPlaceholder = chart && !cur.rankTable && chart.hideUntilAnswered;
+  const showChart = false;
+  const showPlaceholder = chart && !cur.rankTable;
   return `
     <div class="fc-wrap">
       <div class="fc-count">${fc.idx+1} / ${fc.deck.length}</div>
