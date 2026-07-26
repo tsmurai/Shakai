@@ -847,11 +847,11 @@ function renderHome(){
   const doneIds = Object.keys(stats).filter(k=>stats[k].seen>0);
   const wrongIds = Object.keys(stats).filter(k=>stats[k].wrong>0);
   return `
-    ${picker}
     <div class="hero">
       <h2>中学受験 社会暗記</h2>
       <p>日本の国土のデータバンク／日本の人口と都市の資料から、入試で問われやすい暗記事項をまとめました。クイズ・フラッシュカード・一覧の3モードで反復学習でき、正答率や苦手項目は「記録」でいつでも確認できます。資料は今後も追加していきます。</p>
     </div>
+    ${picker}
     <div class="grid3">
       <div class="stat"><b>${totalCards}</b><span>暗記項目数</span></div>
       <div class="stat"><b>${doneIds.length}</b><span>学習済み</span></div>
