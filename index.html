@@ -544,6 +544,40 @@ const RANKINGS = [
      {rank:20,name:'岡山市',value:'71万人'},
      {rank:21,name:'静岡市',value:'66万人'},
    ]},
+  {id:'t14', cat:'産業', domain:'pref', tier:'core', title:'表2 農業産出額', headline:'',
+   note:'',
+   items:[
+     {rank:1,name:'北海道',value:null},
+     {rank:2,name:'鹿児島県',value:null},
+     {rank:3,name:'茨城県',value:null},
+     {rank:4,name:'千葉県',value:null},
+     {rank:5,name:'青森県',value:null},
+     {rank:6,name:'熊本県',value:null},
+   ]},
+  {id:'t15', cat:'産業', domain:'pref', tier:'core', title:'表3 米の都道府県別収穫量', headline:'2025年産　全国約779万トン',
+   note:'地方別では 1位東北地方（28%）2位関東・東山地方（山梨・長野の2県、19%）3位北陸地方（新潟・富山・石川・福井の4県、14%）',
+   items:[
+     {rank:1,name:'新潟県',value:null},
+     {rank:2,name:'北海道',value:null},
+     {rank:3,name:'秋田県',value:null},
+     {rank:4,name:'福島県',value:null},
+     {rank:5,name:'山形県',value:null},
+     {rank:6,name:'宮城県',value:null},
+   ]},
+  {id:'t16', cat:'産業', domain:'pref', tier:'core', title:'表9 とる漁業（海面漁業漁獲量）', headline:'',
+   note:'世界の漁業漁獲量：1位中国 2位インドネシア 3位インド、日本は8位（2024年）',
+   items:[
+     {rank:1,name:'北海道',value:null},
+     {rank:2,name:'長崎県',value:null},
+     {rank:3,name:'茨城県',value:null},
+   ]},
+  {id:'t17', cat:'産業', domain:'pref', tier:'ref', title:'表14 素材（丸太）生産量', headline:'',
+   note:'',
+   items:[
+     {rank:1,name:'北海道',value:null},
+     {rank:2,name:'宮崎県',value:null},
+     {rank:3,name:'秋田県',value:null},
+   ]},
 ];
 
 const FACTS = [
@@ -666,6 +700,93 @@ const FACTS = [
   {id:'f-city10', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'三重県の県庁所在地は？', a:'津市', pool:'city'},
   {id:'f-city11', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'山口県で人口が最も多い都市は？', a:'下関市', pool:'city'},
   {id:'f-city12', cat:'人口', tier:'core', group:'県内で人口が最も多い都市（県庁所在地とは限らない）', q:'山口県の県庁所在地は？', a:'山口市', pool:'city'},
+  // 第1次産業（農業）
+  {id:'f-ag1', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'日本の総耕地面積は？', a:'約424万ha', pool:'ag-overview'},
+  {id:'f-ag2', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'耕地面積が国土にしめる割合は？', a:'約11%', pool:'ag-overview'},
+  {id:'f-ag3', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'1農業経営体あたりの平均耕地面積（全国平均）は？', a:'約3.7ha', pool:'ag-overview'},
+  {id:'f-ag4', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'1農業経営体あたりの平均耕地面積（北海道）は？', a:'約34.5ha', pool:'ag-overview'},
+  {id:'f-ag5', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'農業総産出額（2024年）で最も割合が高い部門は？', a:'畜産物（34.0%）', choices:['畜産物（34.0%）','米（23.7%）','野菜（23.7%）','果実（9.4%）']},
+  {id:'f-ag6', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'田（水田率）が最も高い都道府県は？', a:'富山県（95%）', choices:['富山県（95%）','滋賀県（93%）','新潟県','秋田県']},
+  {id:'f-ag7', cat:'産業', tier:'ref', group:'日本の農業（全体）', q:'畑（野菜など）の割合が最も高い都道府県は？', a:'沖縄県（76%）', choices:['沖縄県（76%）','東京都（75%）','北海道','千葉県']},
+  {id:'f-ag8', cat:'産業', tier:'ref', group:'日本の農業（全体）', q:'畑（果樹・茶畑など）の割合が最も高い都道府県は？', a:'和歌山県（64%）', choices:['和歌山県（64%）','山梨県（43%）','静岡県','鹿児島県']},
+  {id:'f-ag9', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'基幹的農業従事者数と高齢化はどう変化した？（2010年→2025年）', a:'205万人→104万人に減少し、65歳以上の割合は69.6%に上昇した', choices:['205万人→104万人に減少し、65歳以上の割合は69.6%に上昇した','104万人→205万人に増加した','ほぼ横ばいだった','65歳以上の割合はむしろ低下した']},
+  {id:'f-ag10', cat:'産業', tier:'core', group:'日本の農業（全体）', q:'農業経営体の内訳で最も多いのは？', a:'副業的経営体（63.8%）', choices:['副業的経営体（63.8%）','主業経営体（20.0%）','準主業経営体（11.5%）','団体経営体（4.6%）']},
+  {id:'f-ag11', cat:'産業', tier:'core', group:'地域別の農業産出額の割合', q:'北海道の農業産出額で最も割合が高い部門は？', a:'畜産（56.7%）', pool:'chiiki-nogyo'},
+  {id:'f-ag12', cat:'産業', tier:'core', group:'地域別の農業産出額の割合', q:'北陸地方の農業産出額で最も割合が高い部門は？（稲作がさかんな地方）', a:'米（68.3%）', pool:'chiiki-nogyo'},
+  {id:'f-ag13', cat:'産業', tier:'core', group:'地域別の農業産出額の割合', q:'関東・東山地方の農業産出額で最も割合が高い部門は？', a:'野菜（32.7%）', pool:'chiiki-nogyo'},
+  {id:'f-ag14', cat:'産業', tier:'core', group:'地域別の農業産出額の割合', q:'九州地方の農業産出額で最も割合が高い部門は？', a:'畜産（44.7%）', pool:'chiiki-nogyo'},
+  {id:'f-ag15', cat:'産業', tier:'core', group:'地域別の農業産出額の割合', q:'東北地方の農業産出額で最も割合が高い部門は？', a:'米（40.4%）', pool:'chiiki-nogyo'},
+  {id:'f-kome1', cat:'産業', tier:'core', group:'米', q:'米の収穫量が最も多い地方は？', a:'東北地方（28%）', choices:['東北地方（28%）','関東・東山地方（19%）','北陸地方（14%）','北海道']},
+  {id:'f-kome2', cat:'産業', tier:'core', group:'米', q:'2025年産の米の収穫量（全国）は約何トン？', a:'約779万トン', choices:['約779万トン','約424万トン','約86万トン','約53万トン']},
+  {id:'f-kome3', cat:'産業', tier:'ref', group:'米', q:'1人あたりの米の年間供給量（2024年度）は？', a:'53.4kg', choices:['53.4kg','86.0kg','23.7kg','34.5kg']},
+  {id:'f-kome4', cat:'産業', tier:'ref', group:'米', q:'米の輸入量（2025年）は約何トン？', a:'約86万トン', choices:['約86万トン','約779万トン','約424万トン','約37万トン']},
+  {id:'f-kuda1', cat:'産業', tier:'core', group:'果物の生産1位', q:'みかんの生産量1位は？', a:'和歌山県（有田川流域）', pool:'nosanbutsu'},
+  {id:'f-kuda2', cat:'産業', tier:'core', group:'果物の生産1位', q:'りんごの生産量1位は？', a:'青森県（61%・津軽平野）', pool:'nosanbutsu'},
+  {id:'f-kuda3', cat:'産業', tier:'core', group:'果物の生産1位', q:'日本なしの生産量1位は？', a:'千葉県（下総台地）', pool:'nosanbutsu'},
+  {id:'f-kuda4', cat:'産業', tier:'core', group:'果物の生産1位', q:'ぶどうの生産量1位は？', a:'山梨県（甲府盆地）', pool:'nosanbutsu'},
+  {id:'f-kuda5', cat:'産業', tier:'core', group:'果物の生産1位', q:'ももの生産量1位は？', a:'山梨県（甲府盆地）', pool:'nosanbutsu'},
+  {id:'f-kuda6', cat:'産業', tier:'core', group:'果物の生産1位', q:'かきの生産量1位は？', a:'和歌山県（紀の川流域）', pool:'nosanbutsu'},
+  {id:'f-kuda7', cat:'産業', tier:'ref', group:'果物の生産1位', q:'西洋なしの生産量1位は？', a:'山形県（70%・山形盆地）', pool:'nosanbutsu'},
+  {id:'f-kuda8', cat:'産業', tier:'ref', group:'果物の生産1位', q:'うめの生産量1位は？', a:'和歌山県（58%・みなべ町）', pool:'nosanbutsu'},
+  {id:'f-kuda9', cat:'産業', tier:'ref', group:'果物の生産1位', q:'びわの生産量1位は？', a:'長崎県', pool:'nosanbutsu'},
+  {id:'f-kuda10', cat:'産業', tier:'core', group:'果物の生産1位', q:'さくらんぼ（おうとう）の生産量1位は？', a:'山形県（75%・山形盆地）', pool:'nosanbutsu'},
+  {id:'f-kuda11', cat:'産業', tier:'core', group:'果物の生産1位', q:'すいかの生産量1位は？', a:'熊本県（熊本平野）', pool:'nosanbutsu'},
+  {id:'f-kuda12', cat:'産業', tier:'core', group:'果物の生産1位', q:'メロンの生産量1位は？', a:'茨城県', pool:'nosanbutsu'},
+  {id:'f-kuda13', cat:'産業', tier:'ref', group:'果物の生産1位', q:'レモンの生産量1位は？', a:'広島県（85%・瀬戸内海沿岸）', pool:'nosanbutsu'},
+  {id:'f-yasai1', cat:'産業', tier:'core', group:'野菜の生産1位', q:'なすの生産量1位は？', a:'高知県（高知平野・促成栽培）', pool:'nosanbutsu'},
+  {id:'f-yasai2', cat:'産業', tier:'core', group:'野菜の生産1位', q:'ピーマンの生産量1位は？', a:'茨城県', pool:'nosanbutsu'},
+  {id:'f-yasai3', cat:'産業', tier:'core', group:'野菜の生産1位', q:'トマトの生産量1位は？', a:'熊本県（八代平野）', pool:'nosanbutsu'},
+  {id:'f-yasai4', cat:'産業', tier:'core', group:'野菜の生産1位', q:'きゅうりの生産量1位は？', a:'宮崎県（宮崎平野・促成栽培）', pool:'nosanbutsu'},
+  {id:'f-yasai5', cat:'産業', tier:'core', group:'野菜の生産1位', q:'キャベツの生産量1位は？', a:'群馬県（嬬恋村・高冷地農業）', pool:'nosanbutsu'},
+  {id:'f-yasai6', cat:'産業', tier:'core', group:'野菜の生産1位', q:'レタスの生産量1位は？', a:'長野県（野辺山原・高冷地農業）', pool:'nosanbutsu'},
+  {id:'f-yasai7', cat:'産業', tier:'core', group:'野菜の生産1位', q:'はくさいの生産量1位は？', a:'茨城県', pool:'nosanbutsu'},
+  {id:'f-yasai8', cat:'産業', tier:'core', group:'野菜の生産1位', q:'だいこんの生産量1位は？', a:'千葉県（下総台地）', pool:'nosanbutsu'},
+  {id:'f-yasai9', cat:'産業', tier:'core', group:'野菜の生産1位', q:'ねぎの生産量1位は？', a:'茨城県', pool:'nosanbutsu'},
+  {id:'f-yasai10', cat:'産業', tier:'ref', group:'野菜の生産1位', q:'にんじんの生産量1位は？', a:'北海道', pool:'nosanbutsu'},
+  {id:'f-yasai11', cat:'産業', tier:'core', group:'野菜の生産1位', q:'ほうれんそうの生産量1位は？', a:'群馬県', pool:'nosanbutsu'},
+  {id:'f-yasai12', cat:'産業', tier:'ref', group:'野菜の生産1位', q:'ブロッコリーの生産量1位は？', a:'北海道', pool:'nosanbutsu'},
+  {id:'f-yasai13', cat:'産業', tier:'core', group:'野菜の生産1位', q:'たまねぎの生産量1位は？', a:'北海道（67%・北見盆地）', pool:'nosanbutsu'},
+  {id:'f-yasai14', cat:'産業', tier:'core', group:'野菜の生産1位', q:'じゃがいも（ばれいしょ）の生産量1位は？', a:'北海道（81%・十勝平野）', pool:'nosanbutsu'},
+  {id:'f-yasai15', cat:'産業', tier:'ref', group:'野菜の生産1位', q:'れんこんの生産量1位は？', a:'茨城県（50%・霞ヶ浦周辺）', pool:'nosanbutsu'},
+  {id:'f-yasai16', cat:'産業', tier:'core', group:'野菜の生産1位', q:'さつまいも（かんしょ）の生産量1位は？', a:'鹿児島県（シラス台地）', pool:'nosanbutsu'},
+  {id:'f-yasai17', cat:'産業', tier:'ref', group:'野菜の生産1位', q:'こんにゃくいもの生産量1位は？', a:'群馬県（97%）', pool:'nosanbutsu'},
+  {id:'f-kougei1', cat:'産業', tier:'core', group:'工芸作物・特用作物の生産1位', q:'茶（荒茶）の生産量1位は？', a:'鹿児島県（南九州市・知覧）', pool:'nosanbutsu'},
+  {id:'f-kougei2', cat:'産業', tier:'ref', group:'工芸作物・特用作物の生産1位', q:'てんさい（さとうだいこん）の生産量1位は？', a:'北海道（100%・十勝平野）', pool:'nosanbutsu'},
+  {id:'f-kougei3', cat:'産業', tier:'ref', group:'工芸作物・特用作物の生産1位', q:'さとうきびの生産量1位は？', a:'沖縄県（60%）', pool:'nosanbutsu'},
+  {id:'f-kougei4', cat:'産業', tier:'ref', group:'工芸作物・特用作物の生産1位', q:'いぐさの生産量1位は？', a:'熊本県（100%・八代平野）', pool:'nosanbutsu'},
+  {id:'f-mame1', cat:'産業', tier:'core', group:'豆類・雑穀の生産1位', q:'小麦の生産量1位は？', a:'北海道（65%・十勝平野）', pool:'nosanbutsu'},
+  {id:'f-mame2', cat:'産業', tier:'core', group:'豆類・雑穀の生産1位', q:'大豆の生産量1位は？', a:'北海道（53%・十勝平野）', pool:'nosanbutsu'},
+  {id:'f-mame3', cat:'産業', tier:'ref', group:'豆類・雑穀の生産1位', q:'そばの生産量1位は？', a:'北海道', pool:'nosanbutsu'},
+  {id:'f-mame4', cat:'産業', tier:'ref', group:'豆類・雑穀の生産1位', q:'らっかせいの生産量1位は？', a:'千葉県（87%・下総台地）', pool:'nosanbutsu'},
+  {id:'f-chiku1', cat:'産業', tier:'core', group:'畜産物の飼養1位', q:'乳用牛の飼養頭数1位は？', a:'北海道（63%・根釧台地）', pool:'chikusan'},
+  {id:'f-chiku2', cat:'産業', tier:'core', group:'畜産物の飼養1位', q:'肉用牛の飼養頭数1位は？', a:'北海道（根釧台地）', pool:'chikusan'},
+  {id:'f-chiku3', cat:'産業', tier:'core', group:'畜産物の飼養1位', q:'ぶたの飼養頭数1位は？', a:'鹿児島県（シラス台地）', pool:'chikusan'},
+  {id:'f-chiku4', cat:'産業', tier:'core', group:'畜産物の飼養1位', q:'ブロイラーの飼養羽数1位は？', a:'鹿児島県', pool:'chikusan'},
+  {id:'f-chiku5', cat:'産業', tier:'core', group:'畜産物の飼養1位', q:'採卵鶏の飼養羽数1位は？', a:'千葉県', pool:'chikusan'},
+  {id:'f-jikyu1', cat:'産業', tier:'core', group:'食料自給率', q:'日本の食料自給率（カロリーベース、2024年度）は？', a:'38%', choices:['38%','64%','97%','7%']},
+  {id:'f-jikyu2', cat:'産業', tier:'core', group:'食料自給率', q:'日本の食料自給率（生産額ベース、2024年度）は？', a:'64%', choices:['64%','38%','97%','7%']},
+  {id:'f-jikyu3', cat:'産業', tier:'core', group:'食料自給率', q:'食料自給率（重量ベース）が最も低い品目は？', a:'大豆（7%）', choices:['大豆（7%）','小麦（16%）','米（97%）','野菜（78%）']},
+  {id:'f-jikyu4', cat:'産業', tier:'core', group:'食料自給率', q:'食料自給率（重量ベース）がほぼ100%の品目は？', a:'米（97%）', choices:['米（97%）','小麦（16%）','大豆（7%）','果実（36%）']},
+  {id:'f-jikyu5', cat:'産業', tier:'core', group:'食料自給率', q:'食料自給率（カロリーベース）は1970年から2024年にかけてどう変化した？', a:'60%から38%へ低下した', choices:['60%から38%へ低下した','38%から60%へ上昇した','ほぼ横ばいだった','100%から60%へ低下した']},
+  // 第1次産業（水産業・林業）
+  {id:'f-suisan1', cat:'産業', tier:'core', group:'水産業', q:'とる漁業（海面漁業漁獲量）1位の都道府県は？', a:'北海道', pool:'suisan-pref'},
+  {id:'f-suisan2', cat:'産業', tier:'core', group:'水産業', q:'世界の漁業漁獲量で日本は何位？（1位は中国）', a:'8位', choices:['8位','1位','3位','12位']},
+  {id:'f-suisan3', cat:'産業', tier:'core', group:'水産業', q:'かつお類の漁獲量1位は？', a:'静岡県', pool:'suisan-pref'},
+  {id:'f-suisan4', cat:'産業', tier:'core', group:'水産業', q:'いわし類の漁獲量1位は？', a:'茨城県', pool:'suisan-pref'},
+  {id:'f-suisan5', cat:'産業', tier:'core', group:'水産業', q:'ほたて貝の漁獲量1位は？', a:'北海道（99.9%）', pool:'suisan-pref'},
+  {id:'f-suisan6', cat:'産業', tier:'core', group:'水産業', q:'養殖業で、ぶり類の収獲量1位は？', a:'鹿児島県', pool:'suisan-pref'},
+  {id:'f-suisan7', cat:'産業', tier:'core', group:'水産業', q:'養殖業で、かき類の収獲量1位は？', a:'広島県（64%・広島湾）', pool:'suisan-pref'},
+  {id:'f-suisan8', cat:'産業', tier:'core', group:'水産業', q:'養殖業で、わかめ類の収獲量1位は？', a:'宮城県（三陸海岸）', pool:'suisan-pref'},
+  {id:'f-suisan9', cat:'産業', tier:'core', group:'水産業', q:'養殖業で、のり類の収獲量1位は？', a:'兵庫県（瀬戸内海）', pool:'suisan-pref'},
+  {id:'f-suisan10', cat:'産業', tier:'core', group:'水産業', q:'養殖業で、ほたて貝の収獲量1位は？', a:'北海道（71%・サロマ湖）', pool:'suisan-pref'},
+  {id:'f-suisan11', cat:'産業', tier:'ref', group:'水産業', q:'養殖業で、うなぎの収獲量1位は？', a:'鹿児島県（志布志湾周辺）', pool:'suisan-pref'},
+  {id:'f-suisan12', cat:'産業', tier:'ref', group:'水産業', q:'養殖業で、真珠の収獲量1位は？', a:'長崎県（大村湾）', pool:'suisan-pref'},
+  {id:'f-suisan13', cat:'産業', tier:'ref', group:'水産業', q:'輸入水産物「さけ・ます」の輸入先1位は？', a:'チリ（64%）', choices:['チリ（64%）','ノルウェー（19%）','インド','ベトナム']},
+  {id:'f-suisan14', cat:'産業', tier:'core', group:'水産業', q:'水あげ量が最も多い漁港は？', a:'釧路', choices:['釧路','焼津','銚子','枕崎']},
+  {id:'f-ringyo1', cat:'産業', tier:'core', group:'林業', q:'日本の林野率（全国平均）は？', a:'66.4%', choices:['66.4%','31%','84%','11%']},
+  {id:'f-ringyo2', cat:'産業', tier:'core', group:'林業', q:'林野率が最も高い都道府県は？', a:'高知県（84%）', choices:['高知県（84%）','岐阜県','千葉県','大阪府（最も低い）']},
+  {id:'f-ringyo3', cat:'産業', tier:'core', group:'林業', q:'素材（丸太）生産量1位は？', a:'北海道', pool:'pref'},
+  {id:'f-ringyo4', cat:'産業', tier:'core', group:'林業', q:'日本の森林面積のうち、国有林と民有林はどちらが多い？', a:'民有林（69%）', choices:['民有林（69%）','国有林（31%）','半々','ほぼ100%が国有林']},
 ];
 
 /* ========================= ユーティリティ ========================= */
@@ -765,14 +886,14 @@ function markResult(id, ok){
 }
 function buildFullIndex(){
   const map = {};
-  buildDeck(['国土','人口'], true).forEach(c=>{ map[c.id] = c; });
+  buildDeck(['国土','人口','産業'], true).forEach(c=>{ map[c.id] = c; });
   return map;
 }
 
 /* ========================= 状態 ========================= */
 const state = {
   view: 'home',
-  cats: ['国土','人口'],
+  cats: ['国土','人口','産業'],
   includeRef: false,
   quiz: null,
   fc: null,
@@ -842,7 +963,7 @@ function renderHome(){
     `;
   }
 
-  const totalCards = buildDeck(['国土','人口'], false).length;
+  const totalCards = buildDeck(['国土','人口','産業'], false).length;
   const stats = loadStats();
   const doneIds = Object.keys(stats).filter(k=>stats[k].seen>0);
   const wrongIds = Object.keys(stats).filter(k=>stats[k].wrong>0);
@@ -925,7 +1046,7 @@ function renderList(){
     </details>`;
   });
   return `
-    <div class="chipbar">${chip('国土')}${chip('人口')}</div>
+    <div class="chipbar">${chip('国土')}${chip('人口')}${chip('産業')}</div>
     <input class="search" id="listSearch" placeholder="🔍 キーワードで検索（例：琵琶湖）">
     <div id="listBody">${body || '<div class="empty">表示するカテゴリを選んでください</div>'}</div>
   `;
@@ -945,7 +1066,7 @@ function renderQuizSetup(){
   const deckLen = buildDeck(cats, state.includeRef).length;
   return `
     <div class="section-title">クイズ範囲</div>
-    <div class="chipbar">${chip('国土')}${chip('人口')}
+    <div class="chipbar">${chip('国土')}${chip('人口')}${chip('産業')}
       <button class="chip ${state.includeRef?'active':''}" onclick="toggleRef()">📚 参考データも含める</button>
     </div>
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目（入試で問われやすい内容が中心）からランダムに10問出題します。関連する図表があるときは問題と一緒に表示されます。</p>
@@ -1042,7 +1163,7 @@ function renderFcSetup(){
   const deckLen = buildDeck(cats, state.includeRef).length;
   return `
     <div class="section-title">カード範囲</div>
-    <div class="chipbar">${chip('国土')}${chip('人口')}
+    <div class="chipbar">${chip('国土')}${chip('人口')}${chip('産業')}
       <button class="chip ${state.includeRef?'active':''}" onclick="toggleRef()">📚 参考データも含める</button>
     </div>
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目</p>
@@ -1154,7 +1275,7 @@ function renderStats(){
     return `<div class="empty">「${PROFILES[currentProfile()].full}」の学習記録はまだありません。<br>クイズかフラッシュカードに挑戦してみましょう。</div>`;
   }
   let totalSeen=0, totalWrong=0;
-  const byCat = {'国土':{seen:0,wrong:0}, '人口':{seen:0,wrong:0}};
+  const byCat = {'国土':{seen:0,wrong:0}, '人口':{seen:0,wrong:0}, '産業':{seen:0,wrong:0}};
   ids.forEach(id=>{
     const s = stats[id]; const c = index[id];
     totalSeen += s.seen; totalWrong += s.wrong;
