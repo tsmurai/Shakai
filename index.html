@@ -129,6 +129,13 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 .gsb-bar{width:48px; height:150px; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; border:1px solid var(--line);}
 .gsb-seg{width:100%;}
 .gsb-label{margin-top:7px; font-size:12px; font-weight:700; color:var(--ink);}
+.gsb-values{width:100%; margin-top:12px; border-collapse:collapse; font-size:12px; font-variant-numeric:tabular-nums;}
+.gsb-values th, .gsb-values td{padding:5px 4px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap;}
+.gsb-values thead th{font-size:11.5px; color:var(--sub); font-weight:700;}
+.gsb-values tbody td{font-weight:700; color:var(--ink);}
+.gsb-values tr:last-child th, .gsb-values tr:last-child td{border-bottom:none;}
+.gsb-vlabel{text-align:left !important; font-weight:600; color:var(--sub); display:flex; align-items:center; gap:5px;}
+.gsb-vlabel i{width:9px; height:9px; border-radius:2px; display:inline-block; flex:none;}
 .bubble-row{display:flex; justify-content:space-around; align-items:flex-end; gap:8px; flex-wrap:wrap; padding-top:6px;}
 .bubble-col{display:flex; flex-direction:column; align-items:center;}
 .bubble-label{margin-top:6px; font-size:12px; text-align:center; color:var(--ink); line-height:1.45;}
@@ -198,6 +205,9 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 .face.back{background:var(--accent); color:#fff; transform:rotateY(180deg);}
 .face.back .chart-wrap{background:rgba(255,255,255,.14);}
 .face.back .lg-item, .face.back .bl-label, .face.back .bl-value, .face.back .compass-pt, .face.back .gsb-label{color:#fff;}
+.face.back .gsb-values thead th, .face.back .gsb-vlabel{color:rgba(255,255,255,.8);}
+.face.back .gsb-values tbody td{color:#fff;}
+.face.back .gsb-values th, .face.back .gsb-values td{border-bottom-color:rgba(255,255,255,.25);}
 .face.back .compass-pt{background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25);}
 .face .tag{font-size:11.5px; opacity:.75; margin-bottom:8px; font-weight:700;}
 .face .main{font-size:18px; font-weight:700; line-height:1.5;}
@@ -271,8 +281,22 @@ function groupedStackedBars(groups, maskGroup, maskSeg){
     }).join('');
     return `<div class="gsb-col"><div class="gsb-bar">${segs}</div><div class="gsb-label">${g.label}${maskedHere?' '+MASK:''}</div></div>`;
   }).join('');
+  // 数値表。区分が小さい（4.7%など）と棒の中に文字が入らないので、下に一覧で出す。
+  // 出題中（maskGroup指定あり）は答えが漏れるので表示しない。
+  let valueTable = '';
+  if(!maskGroup){
+    const head = groups.map(g=>`<th>${g.label}</th>`).join('');
+    const rows = groups[0].segments.map((s,i)=>{
+      const cells = groups.map(g=>{
+        const hit = g.segments.find(x=>x.label===s.label);
+        return `<td>${hit ? hit.value+'%' : '—'}</td>`;
+      }).join('');
+      return `<tr><th class="gsb-vlabel"><i style="background:var(--s${(s.c!=null?s.c:i%8)+1})"></i>${s.label}</th>${cells}</tr>`;
+    }).join('');
+    valueTable = `<table class="gsb-values"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+  }
   const legend = groups[0].segments.map((s,i)=>`<span class="lg-item"><i style="background:var(--s${(s.c!=null?s.c:i%8)+1})"></i>${s.label}</span>`).join('');
-  return `<div class="chart-wrap"><div class="gsb">${cols}</div><div class="legend">${legend}</div></div>`;
+  return `<div class="chart-wrap"><div class="gsb">${cols}</div>${valueTable || `<div class="legend">${legend}</div>`}</div>`;
 }
 function bubbleChart(items, unit, maskLabel){
   const maxR = 42;
