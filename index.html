@@ -104,6 +104,15 @@ table tr:last-child td{border-bottom:none;}
 dl.facts{margin:0; padding:0 16px 16px;}
 .ansdetail{font-size:12.5px; font-weight:600; opacity:.85; margin-left:2px;}
 .listranks{display:flex; flex-direction:column; gap:2px; margin-top:4px; font-size:12px; color:var(--sub);}
+/* 小テストで間違えた問題 */
+.btn-test{background:var(--accent2); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer;}
+.tag-test{display:inline-block; font-size:10px; background:var(--accent2); color:#fff; padding:2px 7px; border-radius:6px; font-weight:700; margin-left:6px;}
+.btn-testmark{width:100%; margin-top:12px; padding:12px; border-radius:14px; cursor:pointer; font-size:13.5px; font-weight:700;
+  background:var(--chip); color:var(--sub); border:2px dashed var(--line);}
+.btn-testmark.on{background:var(--accent2); color:#fff; border-style:solid; border-color:var(--accent2);}
+.tm-ok{color:var(--good); font-weight:700;}
+.tm-ng{color:var(--bad); font-weight:700;}
+.tm-yet{color:var(--sub); font-weight:700;}
 dl.facts .fitem{padding:9px 0; border-bottom:1px solid var(--line);}
 dl.facts .fitem:last-child{border-bottom:none;}
 dl.facts dt{font-size:13.5px; color:var(--sub); margin-bottom:3px;}
@@ -906,7 +915,7 @@ const FACTS = [
   {id:'f-en15', ranks:['青森県','北海道'], cat:'産業', tier:'core', group:'発電電力量が多い都道府県', q:'風力発電量1位の都道府県は？', a:'青森県', pool:'hatsuden-pref'},
   {id:'f-en16', ranks:['福島県','茨城県'], cat:'産業', tier:'core', group:'発電電力量が多い都道府県', q:'太陽光発電量1位の都道府県は？', a:'福島県', pool:'hatsuden-pref'},
   {id:'f-en17', ranks:['大分県','鹿児島県'], cat:'産業', tier:'core', group:'発電電力量が多い都道府県', q:'地熱発電量1位の都道府県は？', a:'大分県', pool:'hatsuden-pref'},
-  {id:'f-en18', cat:'産業', tier:'ref', group:'環境問題', q:'世界の温室効果ガス排出量が最も多い国は？（2023年）', a:'中国（30.5%）', choices:['中国（30.5%）','アメリカ合衆国（12.8%）','インド（7.7%）','日本（2.4%）']},
+  {id:'f-en18', ranks:['中国（30.4%）','アメリカ合衆国（12.8%）','インド（7.7%）','EU（6.1%）','ロシア（5.4%）','日本（2.4%）'], cat:'産業', tier:'core', group:'環境問題', q:'世界の温室効果ガス排出量が最も多い国は？（2023年）', a:'中国（30.4%）', choices:['中国（30.4%）','アメリカ合衆国（12.8%）','インド（7.7%）','日本（2.4%）']},
   {id:'f-en19', cat:'産業', tier:'ref', group:'環境問題', q:'日本の温室効果ガス排出量の割合（世界、2023年）は？', a:'2.4%', choices:['2.4%','12.8%','7.7%','30.5%']},
   {id:'f-en20', cat:'産業', tier:'ref', group:'環境問題', q:'公害苦情受付件数で最も多いのは？（典型7公害の中で）', a:'騒音（28.1%）', choices:['騒音（28.1%）','大気汚染（18.9%）','水質汚濁（13.7%）','悪臭']},
   // 第2次産業（工業）
@@ -930,6 +939,21 @@ const FACTS = [
   {id:'f-handoutai1', cat:'産業', tier:'ref', group:'自動車・造船・半導体', q:'日本メーカーの半導体の世界シェアは、2005年から2024年でどう変化した？', a:'20.7%から7.0%に低下した', choices:['20.7%から7.0%に低下した','7.0%から20.7%に上昇した','ほぼ横ばい','50%前後で安定']},
   {id:'f-handoutai2', cat:'産業', tier:'ref', group:'自動車・造船・半導体', q:'集積回路（IC）の輸入元1位は？（2024年）', a:'台湾（59%）', choices:['台湾（59%）','中国','アメリカ','韓国']},
   {id:'f-tekko1', cat:'産業', tier:'ref', group:'自動車・造船・半導体', q:'世界の粗鋼生産量1位の国は？（2025年）', a:'中国（52%）', choices:['中国（52%）','インド','アメリカ','日本']},
+  // 小テスト N64-04 で出題され、アプリに未収録だった内容
+  {id:'f-kogyo13', cat:'産業', tier:'core', group:'工業地帯・地域', q:'化学工業の割合が最も高い工業地帯・地域は？', a:'京葉工業地域', detail:'化学42.4%。石油化学コンビナートが集まる', choices:['京葉工業地域','京浜工業地帯','中京工業地帯','阪神工業地帯']},
+  {id:'f-kogyo14', cat:'産業', tier:'core', group:'工業地帯・地域', q:'北海道で、紙・パルプ工業とともに発達している工業は？（第1次産業がさかんなため）', a:'食料品工業', detail:'北海道の製造品出荷額の36.0%を占める', choices:['食料品工業','輸送用機械工業','石油化学工業','鉄鋼業']},
+  {id:'f-kogyo15', cat:'産業', tier:'core', group:'工業のさかんな都市', q:'室蘭市・鹿嶋市・君津市・東海市・加古川市・倉敷市・大分市などでおこなわれている工業は？', a:'製鉄業（鉄鋼業）', detail:'製鉄所は原料の輸入に便利な臨海部に立地する', choices:['製鉄業（鉄鋼業）','石油化学工業','自動車工業','セメント工業']},
+  {id:'f-kogyo16', cat:'産業', tier:'core', group:'工業のさかんな都市', q:'市原市・川崎市・四日市市・倉敷市・周南市・大分市などにある工業施設は？', a:'石油化学コンビナート', detail:'原油の輸入に便利な臨海部に立地する', choices:['石油化学コンビナート','製鉄所','自動車工場','半導体工場']},
+  {id:'f-kogyo17', cat:'産業', tier:'core', group:'日本の工業（全体）', q:'高い技術力をもつ中小工場が集まる地域として有名なのは？', a:'東京都大田区・東大阪市', choices:['東京都大田区・東大阪市','愛知県豊田市','神奈川県川崎市','福岡県北九州市']},
+  {id:'f-kogyo18', cat:'産業', tier:'core', group:'工業地帯・地域', q:'京浜・阪神・瀬戸内・北九州のうち、最も東に位置するのは？', a:'京浜工業地帯', detail:'西へ順に 京浜→阪神→瀬戸内→北九州', choices:['京浜工業地帯','阪神工業地帯','瀬戸内工業地域','北九州工業地帯']},
+  {id:'f-bunpu1', cat:'産業', tier:'core', group:'工場の分布', q:'半導体工場（IC工場）が九州や東北の空港・高速道路沿いに多いのはなぜ？', a:'製品が軽くて高価なため、航空機やトラックで運んでも採算が合うから', choices:['製品が軽くて高価なため、航空機やトラックで運んでも採算が合うから','原料が近くでとれるから','広い土地が必要だから','水を大量に使うから']},
+  {id:'f-bunpu2', cat:'産業', tier:'ref', group:'工場の分布', q:'セメント工場が多く分布するのは、何がとれる地域？', a:'石灰石', choices:['石灰石','鉄鉱石','石炭','原油']},
+  {id:'f-kougai1', cat:'産業', tier:'core', group:'四大公害病と公害', q:'イタイイタイ病の原因となった物質は？', a:'カドミウム', detail:'富山県の神通川流域で発生（水質汚濁）', choices:['カドミウム','メチル水銀（有機水銀）','亜硫酸ガス','窒素酸化物']},
+  {id:'f-kougai2', cat:'産業', tier:'core', group:'四大公害病と公害', q:'四日市ぜんそくの原因となった物質は？', a:'亜硫酸ガス', detail:'三重県四日市市の石油化学コンビナートが原因（大気汚染）', choices:['カドミウム','メチル水銀（有機水銀）','亜硫酸ガス','窒素酸化物']},
+  {id:'f-kougai3', cat:'産業', tier:'core', group:'四大公害病と公害', q:'水俣病・新潟水俣病の原因となった物質は？', a:'メチル水銀（有機水銀）', detail:'熊本県の水俣湾、新潟県の阿賀野川流域で発生（水質汚濁）', choices:['カドミウム','メチル水銀（有機水銀）','亜硫酸ガス','窒素酸化物']},
+  {id:'f-kougai4', cat:'産業', tier:'core', group:'四大公害病と公害', q:'空港の近くで起こる航空機の音による安眠妨害は、どの公害にあたる？', a:'騒音', choices:['騒音','大気汚染','水質汚濁','振動']},
+  {id:'f-kougai5', cat:'産業', tier:'core', group:'四大公害病と公害', q:'家畜飼育場の周辺で起こる畜産公害は、主にどの公害にあたる？', a:'水質汚濁', choices:['騒音','大気汚染','水質汚濁','振動']},
+  {id:'f-kougai6', cat:'産業', tier:'core', group:'四大公害病と公害', q:'亜硫酸ガスによって起きた四日市ぜんそくは、どの公害にあたる？', a:'大気汚染', choices:['騒音','大気汚染','水質汚濁','振動']},
   // 交通
   {id:'f-kotsu1', cat:'交通・貿易', tier:'core', group:'日本の交通（輸送量の変化）', q:'貨物輸送量で、1965年度に最も割合が高かった輸送機関は？', a:'内航海運（43.3%）', choices:['内航海運（43.3%）','鉄道（30.7%）','自動車（26.0%）','航空']},
   {id:'f-kotsu2', cat:'交通・貿易', tier:'core', group:'日本の交通（輸送量の変化）', q:'貨物輸送量で、現在（2023年度）最も割合が高い輸送機関は？', a:'自動車（57.2%）', choices:['自動車（57.2%）','内航海運（38.2%）','鉄道（4.4%）','航空（0.2%）']},
@@ -1022,6 +1046,30 @@ const FACTS = [
 
 /* 表示・出題対象のカテゴリ。新しい資料でカテゴリを増やすときはここに1行足すだけでよい */
 const CATS = ['国土','人口','産業','交通・貿易'];
+
+/* =========================================================================
+   小テストで間違えた問題の記録
+   採点済みの答案を受け取ったらここに1件追加する。
+   wrongIds は RANKINGS / FACTS のカードid。profile は誰のテストか（省略時は全員）。
+   ※アプリ内で自分でマークした分は localStorage 側に別途たまり、両方が「テストで間違えた」になる
+   ========================================================================= */
+const TESTS = [
+  {
+    id:'n64-04',
+    title:'夏期地理ステップ N64-04（データバンク03の復習）',
+    date:'2026年8月',
+    score:'80点',
+    profile:'taku',
+    // 答案の青チェック＝間違い： 設問1・6・7・10
+    wrongIds:[
+      'f-en3',      // 設問1 火力発電の割合（約80%）
+      'f-kogyo16',  // 設問6 石油化学コンビナートのある都市
+      'f-kogyo1',   // 設問7 中小工場が98%
+      'f-kogyo17',  // 設問7 大田区・東大阪市
+      'f-en9',      // 設問10 一次エネルギー供給割合（B＝石油）
+    ],
+  },
+];
 
 /* ========================= ユーティリティ ========================= */
 function shuffle(arr){const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;}
@@ -1120,6 +1168,31 @@ function markResult(id, ok){
   if(!s[id]) s[id] = {seen:0, wrong:0};
   s[id].seen++; if(!ok) s[id].wrong++;
   saveStats(s);
+}
+
+/* ---- 小テストで間違えた問題 ---- */
+const TESTMARK_KEY = 'shakai_testwrong_v1';
+function myTests(){ return TESTS.filter(t=>!t.profile || t.profile===currentProfile()); }
+function loadTestMarks(){
+  try{ return JSON.parse(localStorage.getItem(TESTMARK_KEY+'__'+currentProfile()))||[]; }catch(e){ return []; }
+}
+function saveTestMarks(a){ localStorage.setItem(TESTMARK_KEY+'__'+currentProfile(), JSON.stringify(a)); }
+function testWrongSet(){
+  const s = new Set();
+  myTests().forEach(t=>t.wrongIds.forEach(id=>s.add(id)));
+  loadTestMarks().forEach(id=>s.add(id));
+  return s;
+}
+function isTestWrong(id){ return testWrongSet().has(id); }
+// 実際のテスト由来の印は記録なので消せない。手動で付けた分だけ外せる。
+function isFromPaperTest(id){ return myTests().some(t=>t.wrongIds.includes(id)); }
+function toggleTestWrong(id){
+  if(isFromPaperTest(id)) return;
+  const marks = loadTestMarks();
+  const i = marks.indexOf(id);
+  if(i>=0) marks.splice(i,1); else marks.push(id);
+  saveTestMarks(marks);
+  render();
 }
 function buildFullIndex(){
   const map = {};
@@ -1314,12 +1387,19 @@ function renderQuizSetup(){
       <button class="chip ${state.includeRef?'active':''}" onclick="toggleRef()">📚 参考データも含める</button>
     </div>
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目（入試で問われやすい内容が中心）からランダムに10問出題します。関連する図表があるときは問題と一緒に表示されます。</p>
-    <button class="btn-primary" style="width:100%; padding:16px;" onclick="startQuiz()">クイズを始める（10問）</button>
+    <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startQuiz('all')">クイズを始める（10問）</button>
+    <button class="btn-ghost" style="width:100%; padding:14px; margin-bottom:10px;" onclick="startQuiz('wrong')">苦手問題だけで出題</button>
+    <button class="btn-test" style="width:100%; padding:14px;" onclick="startQuiz('test')">📕 テストで間違えた問題だけ（${testWrongSet().size}問）</button>
   `;
 }
-function startQuiz(){
-  const deck = shuffle(buildDeck(state.cats, state.includeRef));
-  const qs = deck.slice(0, Math.min(10, deck.length)).map(card=>({
+function startQuiz(mode){
+  const picked = pickDeck(mode);
+  if(!picked) return;
+  state.quizMode = mode;
+  const deck = shuffle(picked);
+  // テスト直しは全問やりきりたいので10問で切らない
+  const limit = (mode==='test') ? deck.length : Math.min(10, deck.length);
+  const qs = deck.slice(0, limit).map(card=>({
     card, choices: card.getChoices(), answered:false, correct:null
   }));
   state.quiz = { qs, idx:0, correctCount:0, wrongList:[] };
@@ -1337,7 +1417,7 @@ function renderQuiz(){
     : showPlaceholder ? `<div class="qchart" id="qchartWrap"><div class="chart-wrap chart-hidden">📊 図は回答後に表示されます</div></div>` : '';
   return `
     <div class="progressbar"><i style="width:${pct}%"></i></div>
-    <div class="qbadge">${cur.card.badge}${cur.card.tier==='ref'?'<span class="tag-ref">参考</span>':''}　（${quiz.idx+1} / ${quiz.qs.length}）</div>
+    <div class="qbadge">${cur.card.badge}${cur.card.tier==='ref'?'<span class="tag-ref">参考</span>':''}${isTestWrong(cur.card.id)?'<span class="tag-test">📕 テストで間違えた</span>':''}　（${quiz.idx+1} / ${quiz.qs.length}）</div>
     <div class="qtext">${cur.card.q}</div>
     ${chartHtml}
     <div class="choices" id="choicesWrap">
@@ -1345,8 +1425,19 @@ function renderQuiz(){
     </div>
     <div id="detailWrap"></div>
     <div id="rankctxWrap"></div>
+    <div id="testmarkWrap"></div>
     <div class="nextbar" id="nextbar"></div>
   `;
+}
+/* 紙のテストで間違えた問題を、その場で自分で印を付けられるようにする */
+function testMarkButton(id){
+  if(isFromPaperTest(id)){
+    return `<div class="note">📕 この問題は小テストで間違えた問題として記録されています</div>`;
+  }
+  const on = isTestWrong(id);
+  return `<button class="btn-testmark ${on?'on':''}" onclick="toggleTestWrong('${id}')">
+    ${on ? '📕 テストで間違えた問題に登録ずみ（タップで解除）' : '📕 テストで間違えた問題に追加'}
+  </button>`;
 }
 function answerQuiz(i){
   const quiz = state.quiz;
@@ -1379,6 +1470,7 @@ function answerQuiz(i){
     const el = document.getElementById('qchartWrap');
     if(el) el.innerHTML = VISUALS[cur.card.chartKey].render();
   }
+  document.getElementById('testmarkWrap').innerHTML = testMarkButton(cur.card.id);
   const isLast = quiz.idx === quiz.qs.length-1;
   document.getElementById('nextbar').innerHTML =
     `<button class="btn-primary" onclick="nextQuiz()">${isLast?'結果を見る':'次の問題 →'}</button>`;
@@ -1403,7 +1495,7 @@ function renderQuizResult(){
       : `<div class="empty">🎉 全問正解でした！</div>`}
     <div style="display:flex; gap:10px; margin-top:20px;">
       <button class="btn-ghost" style="flex:1" onclick="go('quiz-setup')">設定に戻る</button>
-      <button class="btn-primary" style="flex:1" onclick="startQuiz()">もう一度</button>
+      <button class="btn-primary" style="flex:1" onclick="startQuiz(state.quizMode||'all')">もう一度</button>
     </div>
   `;
 }
@@ -1419,19 +1511,29 @@ function renderFcSetup(){
       <button class="chip ${state.includeRef?'active':''}" onclick="toggleRef()">📚 参考データも含める</button>
     </div>
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目</p>
-    <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startFc(false)">全カードで開始</button>
-    <button class="btn-ghost" style="width:100%; padding:14px;" onclick="startFc(true)">苦手カードだけで開始</button>
+    <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startFc('all')">全カードで開始</button>
+    <button class="btn-ghost" style="width:100%; padding:14px; margin-bottom:10px;" onclick="startFc('wrong')">苦手カードだけで開始</button>
+    <button class="btn-test" style="width:100%; padding:14px;" onclick="startFc('test')">📕 テストで間違えた問題だけ（${testWrongSet().size}問）</button>
   `;
 }
-function startFc(onlyWrong){
+function pickDeck(mode){
   let deck = buildDeck(state.cats, state.includeRef);
-  if(onlyWrong){
+  if(mode==='wrong'){
     const stats = loadStats();
     deck = deck.filter(c=> stats[c.id] && stats[c.id].wrong>0);
-    if(deck.length===0){ alert('苦手カードはまだありません。まずはクイズかフラッシュカードに挑戦してみてください。'); return; }
+    if(deck.length===0){ alert('苦手カードはまだありません。まずはクイズかフラッシュカードに挑戦してみてください。'); return null; }
+  } else if(mode==='test'){
+    const set = testWrongSet();
+    // テストで間違えた問題は範囲設定に関係なく全部出す
+    deck = buildDeck(CATS, true).filter(c=> set.has(c.id));
+    if(deck.length===0){ alert('テストで間違えた問題はまだ登録されていません。'); return null; }
   }
-  deck = shuffle(deck);
-  state.fc = { deck, idx:0, flipped:false };
+  return deck;
+}
+function startFc(mode){
+  const deck = pickDeck(mode);
+  if(!deck) return;
+  state.fc = { deck: shuffle(deck), idx:0, flipped:false };
   go('fc');
 }
 function renderFc(){
@@ -1447,7 +1549,7 @@ function renderFc(){
       <div class="card3d" onclick="flipFc()">
         <div class="card-inner ${fc.flipped?'flip':''}" id="cardInner">
           <div class="face front">
-            <div class="tag">${cur.badge}</div>
+            <div class="tag">${cur.badge}${isTestWrong(cur.id)?'<span class="tag-test">📕 テストで間違えた</span>':''}</div>
             <div class="main">${cur.q}</div>
             ${showChart ? chart.render(cur.maskKey) : ''}
             ${showPlaceholder ? `<div class="chart-wrap chart-hidden">📊 図は裏面で表示されます</div>` : ''}
@@ -1520,12 +1622,40 @@ function fcPrev(){
 }
 
 /* ========================= 学習記録（フィードバック） ========================= */
+/* 小テストで間違えた問題の記録（アプリ内の正誤とは別に残す） */
+function renderTestSection(index){
+  const set = testWrongSet();
+  if(set.size===0) return '';
+  const stats = loadStats();
+  const rows = [...set].filter(id=>index[id]).map(id=>{
+    const c = index[id];
+    const s = stats[id];
+    const done = s && s.seen>0;
+    const ok = done && s.wrong===0;
+    const state = ok ? '<span class="tm-ok">✓ アプリで正解</span>'
+                : done ? '<span class="tm-ng">まだ間違えている</span>'
+                : '<span class="tm-yet">未着手</span>';
+    return `<div class="wronglist"><div class="q">${c.badge}　${state}</div><div class="a">${c.q}</div></div>`;
+  }).join('');
+  const history = myTests().map(t=>
+    `<div class="note">📕 ${t.title}（${t.date}／${t.score}）　間違い ${t.wrongIds.length}問</div>`
+  ).join('');
+  return `
+    <div class="section-title">📕 テストで間違えた問題（${set.size}問）</div>
+    ${history}
+    ${rows}
+    <div style="margin-top:10px;">
+      <button class="btn-test" style="width:100%; padding:14px;" onclick="startQuiz('test')">この問題だけで解き直す</button>
+    </div>
+  `;
+}
 function renderStats(){
   const stats = loadStats();
   const index = buildFullIndex();
   const ids = Object.keys(stats).filter(id=>stats[id].seen>0 && index[id]);
   if(ids.length===0){
-    return `<div class="empty">「${PROFILES[currentProfile()].full}」の学習記録はまだありません。<br>クイズかフラッシュカードに挑戦してみましょう。</div>`;
+    return `${renderTestSection(index)}
+      <div class="empty">「${PROFILES[currentProfile()].full}」の学習記録はまだありません。<br>クイズかフラッシュカードに挑戦してみましょう。</div>`;
   }
   let totalSeen=0, totalWrong=0;
   const byCat = {}; CATS.forEach(c=>{ byCat[c] = {seen:0, wrong:0}; });
@@ -1564,6 +1694,7 @@ function renderStats(){
         return `<div class="wronglist"><div class="q">${w.card.badge}　出題${w.seen}回／誤答${w.wrong}回（正答率${a}%）</div><div class="a" style="color:var(--bad)">${w.card.q}</div></div>`;
       }).join('')
       : `<div class="empty">まだ誤答はありません 🎉</div>`}
+    ${renderTestSection(index)}
     <div style="margin-top:22px;">
       <button class="btn-ghost" style="width:100%; padding:14px;" onclick="resetStatsConfirm()">学習記録をリセット</button>
     </div>
@@ -1580,6 +1711,7 @@ function resetStatsConfirm(){
 window.go = go; window.toggleCat = toggleCat; window.toggleRef = toggleRef;
 window.startQuiz = startQuiz; window.answerQuiz = answerQuiz; window.nextQuiz = nextQuiz;
 window.startFc = startFc; window.flipFc = flipFc; window.fcResult = fcResult; window.fcNext = fcNext; window.fcPrev = fcPrev;
+window.toggleTestWrong = toggleTestWrong;
 window.fcGoodClick = fcGoodClick;
 window.resetStatsConfirm = resetStatsConfirm;
 window.selectProfile = selectProfile;
