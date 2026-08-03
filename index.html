@@ -107,6 +107,10 @@ dl.facts{margin:0; padding:0 16px 16px;}
 /* 小テストで間違えた問題 */
 .btn-test{background:var(--accent2); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer;}
 .btn-test[disabled]{background:var(--chip); color:var(--sub); cursor:default;}
+.btn-appwrong{background:var(--bad); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer;}
+.btn-appwrong[disabled]{background:var(--chip); color:var(--sub); cursor:default;}
+.btn-ghost[disabled]{border-color:var(--line); color:var(--sub); cursor:default;}
+.tag-wrong{display:inline-block; font-size:10px; background:var(--bad); color:#fff; padding:2px 7px; border-radius:6px; font-weight:700; margin-left:6px;}
 .tag-test{display:inline-block; font-size:10px; background:var(--accent2); color:#fff; padding:2px 7px; border-radius:6px; font-weight:700; margin-left:6px;}
 .btn-testmark{width:100%; margin-top:12px; padding:12px; border-radius:14px; cursor:pointer; font-size:13.5px; font-weight:700;
   background:var(--chip); color:var(--sub); border:2px dashed var(--line);}
@@ -230,9 +234,10 @@ dl.facts dd{margin:0; font-size:15px; font-weight:700;}
 }
 .face.back .hint{color:#fff; background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.6);}
 .fc-btns{display:flex; gap:10px; width:100%; max-width:480px;}
-.fc-btns button{flex:1; padding:14px; border-radius:14px; border:none; font-size:14.5px; font-weight:700; cursor:pointer;}
+.fc-btns button{flex:1; min-width:0; padding:14px 6px; border-radius:14px; border:none; font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap;}
 .fc-again{background:var(--good); color:#fff;}
 .fc-good{background:var(--chip); color:var(--ink);}
+.fc-wrong{background:var(--bad); color:#fff;}
 .fc-good.confirming{background:var(--accent2); animation:pulse 1s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.6;}}
 .fc-nav{display:flex; gap:14px; margin-top:14px; font-size:13px; color:var(--sub);}
@@ -1185,6 +1190,14 @@ function testWrongSet(){
   return s;
 }
 function isTestWrong(id){ return testWrongSet().has(id); }
+// アプリのクイズ／カードで間違えた問題（紙のテストとは別枠で表示する）
+function isAppWrong(id){ const s = loadStats(); return !!(s[id] && s[id].wrong>0); }
+// 苦手＝2つのフラグ（アプリ／紙のテスト）のいずれかが立っている問題
+function isWeak(id){ return isAppWrong(id) || isTestWrong(id); }
+function wrongBadges(id){
+  return (isAppWrong(id) ? '<span class="tag-wrong">✏️ アプリで間違えた</span>' : '')
+       + (isTestWrong(id) ? '<span class="tag-test">📕 テストで間違えた</span>' : '');
+}
 // 実際のテスト由来の印は記録なので消せない。手動で付けた分だけ外せる。
 function isFromPaperTest(id){ return myTests().some(t=>t.wrongIds.includes(id)); }
 function toggleTestWrong(id){
@@ -1277,7 +1290,7 @@ function renderHome(){
   const totalCards = buildDeck(CATS, false).length;
   const stats = loadStats();
   const doneIds = Object.keys(stats).filter(k=>stats[k].seen>0);
-  const wrongIds = Object.keys(stats).filter(k=>stats[k].wrong>0);
+  const wrongIds = Object.keys(buildFullIndex()).filter(id=>isWeak(id));
   return `
     <div class="hero">
       <h2>中学受験 社会暗記</h2>
@@ -1389,15 +1402,14 @@ function renderQuizSetup(){
     </div>
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目（入試で問われやすい内容が中心）からランダムに10問出題します。関連する図表があるときは問題と一緒に表示されます。</p>
     <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startQuiz('all')">クイズを始める（10問）</button>
-    <button class="btn-ghost" style="width:100%; padding:14px; margin-bottom:10px;" onclick="startQuiz('wrong')">苦手問題だけで出題</button>
-    ${testModeButton('quiz')}
+    ${weakModeButtons('quiz')}
   `;
 }
 function startQuiz(mode){
   const picked = pickDeck(mode);
   if(!picked) return;
   state.quizMode = mode;
-  const deck = shuffle(picked);
+  const deck = (mode==='all') ? shuffle(picked) : sortByWeakness(picked);
   // テスト直しは全問やりきりたいので10問で切らない
   const limit = (mode==='test') ? deck.length : Math.min(10, deck.length);
   const qs = deck.slice(0, limit).map(card=>({
@@ -1418,7 +1430,7 @@ function renderQuiz(){
     : showPlaceholder ? `<div class="qchart" id="qchartWrap"><div class="chart-wrap chart-hidden">📊 図は回答後に表示されます</div></div>` : '';
   return `
     <div class="progressbar"><i style="width:${pct}%"></i></div>
-    <div class="qbadge">${cur.card.badge}${cur.card.tier==='ref'?'<span class="tag-ref">参考</span>':''}${isTestWrong(cur.card.id)?'<span class="tag-test">📕 テストで間違えた</span>':''}　（${quiz.idx+1} / ${quiz.qs.length}）</div>
+    <div class="qbadge">${cur.card.badge}${cur.card.tier==='ref'?'<span class="tag-ref">参考</span>':''}${wrongBadges(cur.card.id)}　（${quiz.idx+1} / ${quiz.qs.length}）</div>
     <div class="qtext">${cur.card.q}</div>
     ${chartHtml}
     <div class="choices" id="choicesWrap">
@@ -1513,32 +1525,56 @@ function renderFcSetup(){
     </div>
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目</p>
     <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startFc('all')">全カードで開始</button>
-    <button class="btn-ghost" style="width:100%; padding:14px; margin-bottom:10px;" onclick="startFc('wrong')">苦手カードだけで開始</button>
-    ${testModeButton('fc')}
+    ${weakModeButtons('fc')}
   `;
 }
 /* テストで間違えた問題はユーザーごとの記録。0問なら押せないようにする */
-function testModeButton(kind){
-  const n = testWrongSet().size;
-  const fn = (kind==='quiz') ? "startQuiz('test')" : "startFc('test')";
-  if(n===0){
-    const owners = TESTS.filter(t=>t.profile && t.profile!==currentProfile())
-                        .map(t=>PROFILES[t.profile] ? PROFILES[t.profile].short : t.profile);
-    const who = [...new Set(owners)];
-    const hint = who.length
-      ? ('テストの記録は ' + who.join('・') + ' に登録されています')
-      : 'テストの答案を登録するか、回答画面で問題ごとに印を付けると使えます';
-    return '<button class="btn-test" style="width:100%; padding:14px;" disabled>📕 テストで間違えた問題（登録なし）</button>'
-      + '<p style="color:var(--sub); font-size:12px; margin:8px 2px 0;">' + hint + '</p>';
+/* 苦手／テストで間違えた／アプリで間違えた の3種類を選べるようにする */
+function weakModeButtons(kind){
+  const q = (kind==='quiz');
+  const call = m => (q ? "startQuiz('" : "startFc('") + m + "')";
+  const all = Object.keys(buildFullIndex());
+  const nWeak = all.filter(id=>isWeak(id)).length;
+  const nTest = testWrongSet().size;
+  const nApp  = all.filter(id=>isAppWrong(id)).length;
+  const label = q ? 'で出題' : 'で開始';
+
+  let html = '';
+  html += '<button class="btn-ghost" style="width:100%; padding:14px; margin-bottom:10px;"'
+       + (nWeak? ' onclick="'+call('wrong')+'"' : ' disabled')
+       + '>苦手な問題だけ' + label + '（' + nWeak + '問）</button>';
+  html += '<button class="btn-test" style="width:100%; padding:14px; margin-bottom:10px;"'
+       + (nTest? ' onclick="'+call('test')+'"' : ' disabled')
+       + '>📕 テストで間違えた問題だけ（' + nTest + '問）</button>';
+  html += '<button class="btn-appwrong" style="width:100%; padding:14px;"'
+       + (nApp? ' onclick="'+call('app')+'"' : ' disabled')
+       + '>✏️ アプリで間違えた問題だけ（' + nApp + '問）</button>';
+  if(nWeak===0){
+    html += '<p style="color:var(--sub); font-size:12px; margin:10px 2px 0;">クイズに挑戦するか、回答画面で「テストで間違えた」印を付けると使えます。</p>';
+  } else {
+    html += '<p style="color:var(--sub); font-size:12px; margin:10px 2px 0;">「苦手な問題」は 📕テスト と ✏️アプリ の両方をまとめたものです。間違えた回数が多い問題ほど、よく出るようになります。</p>';
   }
-  return '<button class="btn-test" style="width:100%; padding:14px;" onclick="' + fn + '">📕 テストで間違えた問題だけ（' + n + '問）</button>';
+  return html;
+}
+/* 重み付きランダム。順番はランダムだが、間違えた回数が多い問題ほど
+   前の方に来やすく＝よく出るようにする（Efraimidis-Spirakis法）。 */
+function sortByWeakness(deck){
+  const stats = loadStats();
+  return deck.map(c=>{
+    const wrong = stats[c.id] ? stats[c.id].wrong : 0;
+    const weight = 1 + wrong + (isTestWrong(c.id) ? 1 : 0);
+    return { c: c, key: Math.pow(Math.random(), 1/weight) };
+  }).sort((x,y)=> y.key - x.key).map(x=>x.c);
 }
 function pickDeck(mode){
   let deck = buildDeck(state.cats, state.includeRef);
   if(mode==='wrong'){
-    const stats = loadStats();
-    deck = deck.filter(c=> stats[c.id] && stats[c.id].wrong>0);
-    if(deck.length===0){ alert('苦手カードはまだありません。まずはクイズかフラッシュカードに挑戦してみてください。'); return null; }
+    // 印が付いているのに範囲設定で隠れてしまわないよう、参考データも対象にする
+    deck = buildDeck(state.cats, true).filter(c=> isWeak(c.id));
+    if(deck.length===0){ alert('苦手な問題はまだありません。クイズに挑戦するか、テストで間違えた問題を登録してください。'); return null; }
+  } else if(mode==='app'){
+    deck = buildDeck(state.cats, true).filter(c=> isAppWrong(c.id));
+    if(deck.length===0){ alert('アプリで間違えた問題はまだありません。クイズに挑戦してみてください。'); return null; }
   } else if(mode==='test'){
     const set = testWrongSet();
     // テストで間違えた問題は範囲設定に関係なく全部出す
@@ -1550,7 +1586,8 @@ function pickDeck(mode){
 function startFc(mode){
   const deck = pickDeck(mode);
   if(!deck) return;
-  state.fc = { deck: shuffle(deck), idx:0, flipped:false };
+  const ordered = (mode==='all') ? shuffle(deck) : sortByWeakness(deck);
+  state.fc = { deck: ordered, idx:0, flipped:false };
   go('fc');
 }
 function renderFc(){
@@ -1566,7 +1603,7 @@ function renderFc(){
       <div class="card3d" onclick="flipFc()">
         <div class="card-inner ${fc.flipped?'flip':''}" id="cardInner">
           <div class="face front">
-            <div class="tag">${cur.badge}${isTestWrong(cur.id)?'<span class="tag-test">📕 テストで間違えた</span>':''}</div>
+            <div class="tag">${cur.badge}${wrongBadges(cur.id)}</div>
             <div class="main">${cur.q}</div>
             ${showChart ? chart.render(cur.maskKey) : ''}
             ${showPlaceholder ? `<div class="chart-wrap chart-hidden">📊 図は裏面で表示されます</div>` : ''}
@@ -1586,6 +1623,7 @@ function renderFc(){
       </div>
       <div class="fc-btns">
         <button class="fc-good" id="fcGoodBtn" onclick="fcGoodClick()">覚えた ✓</button>
+        <button class="fc-wrong" onclick="fcResult(false)">間違えた</button>
         <button class="fc-again" onclick="fcSkip()">次へ</button>
       </div>
       <div class="fc-nav">
@@ -1711,7 +1749,7 @@ function renderStats(){
     </div>
     <div class="section-title">カテゴリ別 正答率</div>
     <div class="chart-wrap"><div class="barlist">${catRows}</div></div>
-    <div class="section-title">苦手ランキング（誤答が多い順・上位15）</div>
+    <div class="section-title">✏️ アプリで間違えた問題（誤答が多い順・上位15）</div>
     ${worst.length ? worst.map(w=>{
         const a = Math.round((w.seen-w.wrong)/w.seen*100);
         return `<div class="wronglist"><div class="q">${w.card.badge}　出題${w.seen}回／誤答${w.wrong}回（正答率${a}%）</div><div class="a" style="color:var(--bad)">${w.card.q}</div></div>`;
