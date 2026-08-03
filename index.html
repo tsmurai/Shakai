@@ -106,6 +106,7 @@ dl.facts{margin:0; padding:0 16px 16px;}
 .listranks{display:flex; flex-direction:column; gap:2px; margin-top:4px; font-size:12px; color:var(--sub);}
 /* 小テストで間違えた問題 */
 .btn-test{background:var(--accent2); color:#fff; border:none; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer;}
+.btn-test[disabled]{background:var(--chip); color:var(--sub); cursor:default;}
 .tag-test{display:inline-block; font-size:10px; background:var(--accent2); color:#fff; padding:2px 7px; border-radius:6px; font-weight:700; margin-left:6px;}
 .btn-testmark{width:100%; margin-top:12px; padding:12px; border-radius:14px; cursor:pointer; font-size:13.5px; font-weight:700;
   background:var(--chip); color:var(--sub); border:2px dashed var(--line);}
@@ -1050,8 +1051,9 @@ const CATS = ['国土','人口','産業','交通・貿易'];
 /* =========================================================================
    小テストで間違えた問題の記録
    採点済みの答案を受け取ったらここに1件追加する。
-   wrongIds は RANKINGS / FACTS のカードid。profile は誰のテストか（省略時は全員）。
-   ※アプリ内で自分でマークした分は localStorage 側に別途たまり、両方が「テストで間違えた」になる
+   wrongIds は RANKINGS / FACTS のカードid。
+   profile を書くとその人だけの記録になるが、既定では全員（Tsu/Taku/Tomo）に反映する。
+   ※アプリ内で自分でマークした分は localStorage 側にユーザーごとにたまり、両方が「テストで間違えた」になる
    ========================================================================= */
 const TESTS = [
   {
@@ -1059,7 +1061,6 @@ const TESTS = [
     title:'夏期地理ステップ N64-04（データバンク03の復習）',
     date:'2026年8月',
     score:'80点',
-    profile:'taku',
     // 答案の青チェック＝間違い： 設問1・6・7・10
     wrongIds:[
       'f-en3',      // 設問1 火力発電の割合（約80%）
@@ -1389,7 +1390,7 @@ function renderQuizSetup(){
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目（入試で問われやすい内容が中心）からランダムに10問出題します。関連する図表があるときは問題と一緒に表示されます。</p>
     <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startQuiz('all')">クイズを始める（10問）</button>
     <button class="btn-ghost" style="width:100%; padding:14px; margin-bottom:10px;" onclick="startQuiz('wrong')">苦手問題だけで出題</button>
-    <button class="btn-test" style="width:100%; padding:14px;" onclick="startQuiz('test')">📕 テストで間違えた問題だけ（${testWrongSet().size}問）</button>
+    ${testModeButton('quiz')}
   `;
 }
 function startQuiz(mode){
@@ -1513,8 +1514,24 @@ function renderFcSetup(){
     <p style="color:var(--sub); font-size:13.5px; margin-bottom:20px;">対象 ${deckLen} 項目</p>
     <button class="btn-primary" style="width:100%; padding:16px; margin-bottom:10px;" onclick="startFc('all')">全カードで開始</button>
     <button class="btn-ghost" style="width:100%; padding:14px; margin-bottom:10px;" onclick="startFc('wrong')">苦手カードだけで開始</button>
-    <button class="btn-test" style="width:100%; padding:14px;" onclick="startFc('test')">📕 テストで間違えた問題だけ（${testWrongSet().size}問）</button>
+    ${testModeButton('fc')}
   `;
+}
+/* テストで間違えた問題はユーザーごとの記録。0問なら押せないようにする */
+function testModeButton(kind){
+  const n = testWrongSet().size;
+  const fn = (kind==='quiz') ? "startQuiz('test')" : "startFc('test')";
+  if(n===0){
+    const owners = TESTS.filter(t=>t.profile && t.profile!==currentProfile())
+                        .map(t=>PROFILES[t.profile] ? PROFILES[t.profile].short : t.profile);
+    const who = [...new Set(owners)];
+    const hint = who.length
+      ? ('テストの記録は ' + who.join('・') + ' に登録されています')
+      : 'テストの答案を登録するか、回答画面で問題ごとに印を付けると使えます';
+    return '<button class="btn-test" style="width:100%; padding:14px;" disabled>📕 テストで間違えた問題（登録なし）</button>'
+      + '<p style="color:var(--sub); font-size:12px; margin:8px 2px 0;">' + hint + '</p>';
+  }
+  return '<button class="btn-test" style="width:100%; padding:14px;" onclick="' + fn + '">📕 テストで間違えた問題だけ（' + n + '問）</button>';
 }
 function pickDeck(mode){
   let deck = buildDeck(state.cats, state.includeRef);
@@ -1526,7 +1543,7 @@ function pickDeck(mode){
     const set = testWrongSet();
     // テストで間違えた問題は範囲設定に関係なく全部出す
     deck = buildDeck(CATS, true).filter(c=> set.has(c.id));
-    if(deck.length===0){ alert('テストで間違えた問題はまだ登録されていません。'); return null; }
+    if(deck.length===0){ alert('「'+PROFILES[currentProfile()].full+'」にはテストで間違えた問題が登録されていません。ユーザーを切り替えるか、回答画面で印を付けてください。'); return null; }
   }
   return deck;
 }
@@ -1569,7 +1586,7 @@ function renderFc(){
       </div>
       <div class="fc-btns">
         <button class="fc-good" id="fcGoodBtn" onclick="fcGoodClick()">覚えた ✓</button>
-        <button class="fc-again" onclick="fcResult(false)">次へ</button>
+        <button class="fc-again" onclick="fcSkip()">次へ</button>
       </div>
       <div class="fc-nav">
         <span onclick="fcPrev()">← 前へ</span>
@@ -1604,6 +1621,12 @@ function fcResult(ok){
   const fc = state.fc;
   fcResetGoodConfirm();
   markResult(fc.deck[fc.idx].id, ok);
+  fcNext();
+}
+// 「次へ」は単に送るだけ。ここで誤答として記録すると、めくっただけで
+// 全部が苦手判定になり正答率も崩れるため、記録は残さない。
+function fcSkip(){
+  fcResetGoodConfirm();
   fcNext();
 }
 function fcNext(){
@@ -1711,7 +1734,7 @@ function resetStatsConfirm(){
 window.go = go; window.toggleCat = toggleCat; window.toggleRef = toggleRef;
 window.startQuiz = startQuiz; window.answerQuiz = answerQuiz; window.nextQuiz = nextQuiz;
 window.startFc = startFc; window.flipFc = flipFc; window.fcResult = fcResult; window.fcNext = fcNext; window.fcPrev = fcPrev;
-window.toggleTestWrong = toggleTestWrong;
+window.toggleTestWrong = toggleTestWrong; window.fcSkip = fcSkip;
 window.fcGoodClick = fcGoodClick;
 window.resetStatsConfirm = resetStatsConfirm;
 window.selectProfile = selectProfile;
